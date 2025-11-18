@@ -1,0 +1,168 @@
+<div class="panel-container">
+    <mat-card class="filter-card">
+        <mat-card-header>
+            <mat-card-title>
+                <h2>
+                    <mat-icon>warning</mat-icon>
+                    Panel de Riesgo Académico
+                </h2>
+                <p class="subtitle">Estudiantes con 2 o más competencias en nivel C</p>
+            </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <form [formGroup]="filterForm">
+                <div class="filter-row">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Periodo</mat-label>
+                        <mat-select formControlName="periodo">
+                            <mat-option *ngFor="let periodo of periodos" [value]="periodo.value">
+                                {{ periodo.viewValue }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>calendar_today</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Año</mat-label>
+                        <input matInput type="number" formControlName="anio">
+                        <mat-icon matPrefix>event</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Grado (Opcional)</mat-label>
+                        <mat-select formControlName="grado">
+                            <mat-option value="">Todos</mat-option>
+                            <mat-option *ngFor="let grado of grados" [value]="grado.value">
+                                {{ grado.viewValue }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>school</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Sección (Opcional)</mat-label>
+                        <mat-select formControlName="seccion">
+                            <mat-option value="">Todas</mat-option>
+                            <mat-option *ngFor="let seccion of secciones" [value]="seccion.value">
+                                {{ seccion.viewValue }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>class</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <div class="filter-actions">
+                    <button mat-raised-button color="primary" (click)="buscarEstudiantesEnRiesgo()"
+                        [disabled]="isLoading">
+                        <mat-icon>search</mat-icon>
+                        Buscar
+                    </button>
+                    <button mat-raised-button (click)="limpiarFiltros()" [disabled]="isLoading">
+                        <mat-icon>clear</mat-icon>
+                        Limpiar Filtros
+                    </button>
+                    <button mat-raised-button color="accent" (click)="exportarReporte()" [disabled]="isLoading">
+                        <mat-icon>download</mat-icon>
+                        Exportar
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Estadísticas -->
+    <div class="stats-container">
+        <mat-card class="stat-card critical">
+            <mat-icon>error</mat-icon>
+            <div class="stat-content">
+                <h3>{{ totalEnRiesgo }}</h3>
+                <p>Estudiantes en Riesgo Académico</p>
+            </div>
+        </mat-card>
+    </div>
+
+    <!-- Tabla de resultados -->
+    <mat-card class="table-card">
+        <mat-card-content>
+            <div class="loading-container" *ngIf="isLoading">
+                <mat-spinner></mat-spinner>
+                <p>Cargando datos...</p>
+            </div>
+
+            <div class="table-container" *ngIf="!isLoading">
+                <table mat-table [dataSource]="dataSource" class="mat-elevation-z2">
+
+                    <!-- Columna Alerta -->
+                    <ng-container matColumnDef="alerta">
+                        <th mat-header-cell *matHeaderCellDef>Nivel</th>
+                        <td mat-cell *matCellDef="let estudiante">
+                            <mat-icon [class]="'alerta-icon ' + getNivelRiesgo(estudiante.competenciasEnC)">
+                                {{ getIconoAlerta(estudiante.competenciasEnC) }}
+                            </mat-icon>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Estudiante -->
+                    <ng-container matColumnDef="estudiante">
+                        <th mat-header-cell *matHeaderCellDef>Estudiante</th>
+                        <td mat-cell *matCellDef="let estudiante">
+                            <div class="student-info">
+                                <mat-icon>person</mat-icon>
+                                <span>{{ estudiante.nombreEstudiante }}</span>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Grado -->
+                    <ng-container matColumnDef="grado">
+                        <th mat-header-cell *matHeaderCellDef>Grado</th>
+                        <td mat-cell *matCellDef="let estudiante">{{ estudiante.grado }}</td>
+                    </ng-container>
+
+                    <!-- Columna Sección -->
+                    <ng-container matColumnDef="seccion">
+                        <th mat-header-cell *matHeaderCellDef>Sección</th>
+                        <td mat-cell *matCellDef="let estudiante">
+                            <mat-chip>{{ estudiante.seccion }}</mat-chip>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Competencias en C -->
+                    <ng-container matColumnDef="competenciasEnC">
+                        <th mat-header-cell *matHeaderCellDef>Competencias en C</th>
+                        <td mat-cell *matCellDef="let estudiante">
+                            <mat-chip [class]="'riesgo-chip ' + getNivelRiesgo(estudiante.competenciasEnC)">
+                                {{ estudiante.competenciasEnC }} competencia(s)
+                            </mat-chip>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Acciones -->
+                    <ng-container matColumnDef="acciones">
+                        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                        <td mat-cell *matCellDef="let estudiante">
+                            <button mat-icon-button color="primary"
+                                (click)="verDetalleEstudiante(estudiante.idEstudiante)" matTooltip="Ver evolución">
+                                <mat-icon>visibility</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                    <!-- Sin datos -->
+                    <tr class="mat-row" *matNoDataRow>
+                        <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length">
+                            <div class="no-data-container">
+                                <mat-icon>check_circle</mat-icon>
+                                <p>¡Excelente! No hay estudiantes en riesgo académico</p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>

@@ -1,0 +1,157 @@
+<div class="container">
+    <mat-card class="form-card">
+        <mat-card-header>
+            <mat-card-title>
+                <h2>
+                    <mat-icon>{{ edicion ? 'edit' : 'add_circle' }}</mat-icon>
+                    {{ edicion ? 'Editar Nota' : 'Registrar Nueva Nota' }}
+                </h2>
+            </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <form [formGroup]="form" (ngSubmit)="aceptar()">
+                <div class="form-row">
+                    <!-- Estudiante -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Estudiante</mat-label>
+                        <mat-select formControlName="idEstudiante" required>
+                            <mat-option *ngFor="let estudiante of listaEstudiantes" [value]="estudiante.idEstudiante">
+                                {{ estudiante.nombres }} {{ estudiante.apellidos }} - {{ estudiante.grado }} {{
+                                estudiante.seccion }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>person</mat-icon>
+                        <mat-error *ngIf="form.get('idEstudiante')?.hasError('required')">
+                            Seleccione un estudiante
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Competencia -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Competencia</mat-label>
+                        <mat-select formControlName="idCompetencia" required>
+                            <mat-option *ngFor="let competencia of listaCompetencias"
+                                [value]="competencia.idCompetencia">
+                                {{ competencia.nombreCompetencia }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>stars</mat-icon>
+                        <mat-error *ngIf="form.get('idCompetencia')?.hasError('required')">
+                            Seleccione una competencia
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Calificación con letras -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Calificación</mat-label>
+                        <mat-select formControlName="calificacion" required>
+                            <mat-option *ngFor="let cal of calificaciones" [value]="cal.value">
+                                <span [style.color]="cal.color" style="font-weight: 600;">
+                                    {{ cal.viewValue }}
+                                </span>
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>grade</mat-icon>
+                        <mat-error *ngIf="form.get('calificacion')?.hasError('required')">
+                            Seleccione una calificación
+                        </mat-error>
+                        <mat-hint>AD: Destacado | A: Esperado | B: Proceso | C: Inicio</mat-hint>
+                    </mat-form-field>
+
+                    <!-- Vista previa de calificación -->
+                    <div class="calificacion-preview" *ngIf="form.get('calificacion')?.value">
+                        <mat-chip [style.background-color]="getCalificacionColor(form.get('calificacion')?.value)"
+                            [style.color]="'white'">
+                            {{ form.get('calificacion')?.value }}
+                        </mat-chip>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <!-- Periodo -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Periodo</mat-label>
+                        <mat-select formControlName="periodo" required>
+                            <mat-option *ngFor="let periodo of periodos" [value]="periodo.value">
+                                {{ periodo.viewValue }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>calendar_today</mat-icon>
+                        <mat-error *ngIf="form.get('periodo')?.hasError('required')">
+                            Seleccione un periodo
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Año -->
+                    <mat-form-field appearance="outline">
+                        <mat-label>Año Académico</mat-label>
+                        <input matInput type="number" formControlName="anio" required min="2020">
+                        <mat-icon matPrefix>event</mat-icon>
+                        <mat-error *ngIf="form.get('anio')?.hasError('required')">
+                            Ingrese el año académico
+                        </mat-error>
+                        <mat-error *ngIf="form.get('anio')?.hasError('min')">
+                            El año debe ser mayor a 2020
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Docente -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Docente</mat-label>
+                        <mat-select formControlName="idDocente" required
+                            [disabled]="currentUserRole === 'USER' && !edicion">
+                            <mat-option *ngFor="let docente of listaDocentes" [value]="docente.id">
+                                {{ docente.nombres }} {{ docente.apellidos }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>school</mat-icon>
+                        <mat-error *ngIf="form.get('idDocente')?.hasError('required')">
+                            Seleccione un docente
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                    <!-- Observación -->
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Observación</mat-label>
+                        <textarea matInput formControlName="observacion" rows="4" maxlength="500"
+                            placeholder="Ingrese observaciones adicionales (opcional)"></textarea>
+                        <mat-icon matPrefix>comment</mat-icon>
+                        <mat-hint align="end">
+                            {{ form.get('observacion')?.value?.length || 0 }}/500
+                        </mat-hint>
+                        <mat-error *ngIf="form.get('observacion')?.hasError('maxlength')">
+                            Máximo 500 caracteres
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Mensaje de error -->
+                <div class="error-message" *ngIf="mensaje">
+                    <mat-icon>error</mat-icon>
+                    <span>{{ mensaje }}</span>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="form-actions">
+                    <button mat-raised-button type="button" (click)="cancelar()" [disabled]="isLoading">
+                        <mat-icon>cancel</mat-icon>
+                        Cancelar
+                    </button>
+                    <button mat-raised-button color="primary" type="submit" [disabled]="!form.valid || isLoading">
+                        <mat-spinner diameter="20" *ngIf="isLoading"
+                            style="display: inline-block; margin-right: 8px;"></mat-spinner>
+                        <mat-icon *ngIf="!isLoading">save</mat-icon>
+                        {{ edicion ? 'Actualizar' : 'Guardar' }}
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>

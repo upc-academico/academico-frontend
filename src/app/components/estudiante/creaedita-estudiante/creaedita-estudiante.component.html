@@ -1,0 +1,124 @@
+<div class="container">
+  <div class="form-card mat-elevation-z4">
+    <div class="form-header">
+      <h2 class="form-title">
+        <mat-icon>{{ edicion ? 'edit' : 'person_add' }}</mat-icon>
+        {{ edicion ? 'Editar Estudiante' : 'Nuevo Estudiante' }}
+      </h2>
+      <p class="form-subtitle">
+        {{ edicion ? 'Modifica los datos del estudiante' : 'Completa la información del estudiante' }}
+      </p>
+    </div>
+
+    <form [formGroup]="form" (submit)="aceptar()" class="estudiante-form">
+
+      <!-- ID (solo en edición) -->
+      <mat-form-field appearance="outline" class="full-width" *ngIf="edicion">
+        <mat-label>Código del Estudiante</mat-label>
+        <input matInput formControlName="idEstudiante" readonly />
+        <mat-icon matPrefix>badge</mat-icon>
+      </mat-form-field>
+
+      <!-- Datos Personales Section -->
+      <div class="section-title">
+        <mat-icon>account_circle</mat-icon>
+        <span>Datos Personales</span>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field-medium">
+          <mat-label>DNI</mat-label>
+          <input matInput placeholder="12345678" formControlName="dni" maxlength="8" type="text" />
+          <mat-icon matPrefix>credit_card</mat-icon>
+          <mat-hint align="end">{{ form.get('dni')?.value?.length || 0 }}/8</mat-hint>
+          <mat-error *ngIf="obtenerControlCampo('dni')?.errors?.['required']">
+            El DNI es obligatorio
+          </mat-error>
+          <mat-error *ngIf="obtenerControlCampo('dni')?.errors?.['pattern']">
+            El DNI debe contener solo números
+          </mat-error>
+          <mat-error *ngIf="obtenerControlCampo('dni')?.errors?.['minlength']">
+            El DNI debe tener 8 dígitos
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nombres</mat-label>
+        <input matInput placeholder="Ej: Juan Carlos" formControlName="nombres" maxlength="50" />
+        <mat-icon matPrefix>person</mat-icon>
+        <mat-error *ngIf="obtenerControlCampo('nombres')?.errors?.['required']">
+          Los nombres son obligatorios
+        </mat-error>
+        <mat-error *ngIf="obtenerControlCampo('nombres')?.errors?.['minlength']">
+          Debe tener al menos 2 caracteres
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Apellidos</mat-label>
+        <input matInput placeholder="Ej: Pérez García" formControlName="apellidos" maxlength="50" />
+        <mat-icon matPrefix>person_outline</mat-icon>
+        <mat-error *ngIf="obtenerControlCampo('apellidos')?.errors?.['required']">
+          Los apellidos son obligatorios
+        </mat-error>
+        <mat-error *ngIf="obtenerControlCampo('apellidos')?.errors?.['minlength']">
+          Debe tener al menos 2 caracteres
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Datos Académicos Section -->
+      <div class="section-title">
+        <mat-icon>school</mat-icon>
+        <span>Datos Académicos</span>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="form-field-half">
+          <mat-label>Grado</mat-label>
+          <mat-select formControlName="grado">
+            <mat-option *ngFor="let g of grados" [value]="g.value">
+              <mat-icon>{{ g.icon }}</mat-icon>
+              {{ g.viewValue }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>grade</mat-icon>
+          <mat-error *ngIf="obtenerControlCampo('grado')?.errors?.['required']">
+            El grado es obligatorio
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="form-field-half">
+          <mat-label>Sección</mat-label>
+          <mat-select formControlName="seccion">
+            <mat-option *ngFor="let s of secciones" [value]="s.value">
+              {{ s.viewValue }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>class</mat-icon>
+          <mat-error *ngIf="obtenerControlCampo('seccion')?.errors?.['required']">
+            La sección es obligatoria
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Mensaje de alerta -->
+      <div class="alert-message" *ngIf="mensaje">
+        <mat-icon>warning</mat-icon>
+        <span>{{ mensaje }}</span>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="form-actions">
+        <button mat-raised-button color="warn" type="button" routerLink="/components/estudiantes" class="btn-cancel">
+          <mat-icon>close</mat-icon>
+          Cancelar
+        </button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!form.valid" class="btn-submit">
+          <mat-icon>{{ edicion ? 'save' : 'check' }}</mat-icon>
+          {{ edicion ? 'Actualizar' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

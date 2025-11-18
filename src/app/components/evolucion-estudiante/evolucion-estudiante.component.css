@@ -1,0 +1,262 @@
+.evolucion-container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Header */
+.header-card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header-card mat-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    margin: -16px;
+    border-radius: 4px;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-info h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.header-info p {
+    margin: 5px 0 0 0;
+    opacity: 0.9;
+    font-size: 14px;
+}
+
+.header-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    opacity: 0.8;
+}
+
+/* Loading */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px;
+    gap: 20px;
+}
+
+/* Estadísticas */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.stat-card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+}
+
+.stat-card.mejora {
+    border-left: 4px solid #4caf50;
+}
+
+.stat-card.retroceso {
+    border-left: 4px solid #f44336;
+}
+
+.stat-card.estable {
+    border-left: 4px solid #2196f3;
+}
+
+.stat-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+}
+
+.stat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+}
+
+.stat-icon.primary {
+    color: #667eea;
+}
+
+.stat-icon.success {
+    color: #4caf50;
+}
+
+.stat-icon.warning {
+    color: #ff9800;
+}
+
+.stat-card.mejora .stat-icon {
+    color: #4caf50;
+}
+
+.stat-card.retroceso .stat-icon {
+    color: #f44336;
+}
+
+.stat-card.estable .stat-icon {
+    color: #2196f3;
+}
+
+.stat-info h3 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+    color: #333;
+}
+
+.stat-info p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Gráficos */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 20px;
+}
+
+.chart-card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.chart-container {
+    height: 400px;
+    padding: 20px;
+}
+
+/* Recomendaciones */
+.recommendations-card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.recommendations-card mat-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    margin: -16px -16px 20px -16px;
+    border-radius: 4px 4px 0 0;
+}
+
+.recommendations-card mat-card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.recommendation-section {
+    display: flex;
+    gap: 15px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.rec-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+.rec-icon.success {
+    color: #4caf50;
+}
+
+.rec-icon.warning {
+    color: #ff9800;
+}
+
+.rec-icon.error {
+    color: #f44336;
+}
+
+.rec-icon.info {
+    color: #2196f3;
+}
+
+.rec-content h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 18px;
+}
+
+.rec-content p {
+    margin: 0 0 10px 0;
+    color: #666;
+    line-height: 1.6;
+}
+
+.rec-content ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.rec-content li {
+    margin: 5px 0;
+    color: #666;
+}
+
+/* Botones de acción */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px 0;
+}
+
+@media (max-width: 768px) {
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .action-buttons button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}

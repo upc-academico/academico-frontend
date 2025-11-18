@@ -1,0 +1,237 @@
+<mat-toolbar *ngIf="isLoggedIn" color="primary" class="modern-toolbar">
+  <!-- Logo y Título -->
+  <div class="toolbar-brand">
+    <button mat-icon-button (click)="toggleSidenav()" class="menu-button">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <img src="assets/logo1.png" alt="Logo" class="toolbar-logo" routerLink="/components/welcome">
+    <span class="toolbar-title" routerLink="/components/welcome">Sistema Académico</span>
+  </div>
+
+  <!-- Spacer para empujar los elementos a la derecha -->
+  <span class="toolbar-spacer"></span>
+
+  <!-- ⬇️ Menú de navegación ADMIN (Director) -->
+  <div class="toolbar-navigation" *ngIf="esAdmin()">
+    <button mat-button [matMenuTriggerFor]="menuCursos" class="nav-button">
+      <mat-icon>school</mat-icon>
+      <span>Cursos</span>
+      <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+    </button>
+
+    <button mat-button [matMenuTriggerFor]="menuUsuarios" class="nav-button">
+      <mat-icon>group</mat-icon>
+      <span>Usuarios</span>
+      <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+    </button>
+
+    <button mat-button [matMenuTriggerFor]="menuEstudiante" class="nav-button">
+      <mat-icon>person</mat-icon>
+      <span>Estudiantes</span>
+      <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+    </button>
+
+    <button mat-button [matMenuTriggerFor]="menuCompetencias" class="nav-button">
+      <mat-icon>stars</mat-icon>
+      <span>Competencias</span>
+      <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+    </button>
+
+    <button mat-button [matMenuTriggerFor]="menuNotas" class="nav-button">
+      <mat-icon>assignment</mat-icon>
+      <span>Notas</span>
+      <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+    </button>
+
+    <button mat-button [matMenuTriggerFor]="menuAsignaciones" class="nav-button">
+      <mat-icon>assignment_ind</mat-icon>
+      <span>Asignaciones</span>
+      <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+    </button>
+
+    <button mat-button [matMenuTriggerFor]="menuAnalisis" class="nav-button">
+      <mat-icon>analytics</mat-icon>
+      <span>Análisis</span>
+      <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+    </button>
+  </div>
+
+  <!-- ⬇️ NUEVO: Menú de navegación USER (Docentes) -->
+  <div class="toolbar-navigation" *ngIf="esDocente()">
+    <button mat-button [matMenuTriggerFor]="menuNotasDocente" class="nav-button">
+      <mat-icon>assignment</mat-icon>
+      <span>Mis Notas</span>
+      <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+    </button>
+
+    <button mat-button [matMenuTriggerFor]="menuReportesDocente" class="nav-button">
+      <mat-icon>assessment</mat-icon>
+      <span>Reportes</span>
+      <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+    </button>
+
+    <button mat-button [matMenuTriggerFor]="menuAnalisisDocente" class="nav-button">
+      <mat-icon>show_chart</mat-icon>
+      <span>Análisis</span>
+      <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+    </button>
+  </div>
+
+  <!-- Usuario -->
+  <button mat-button [matMenuTriggerFor]="menuUsuario" class="user-button">
+    <mat-icon>account_circle</mat-icon>
+    <span class="user-name">{{username}}</span>
+    <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+  </button>
+</mat-toolbar>
+
+<!-- ========== MENÚS DESPLEGABLES ADMIN ========== -->
+
+<!-- Menú Cursos -->
+<mat-menu #menuCursos="matMenu" class="custom-menu">
+  <button mat-menu-item routerLink="/components/cursos">
+    <mat-icon>list</mat-icon>
+    <span>Listar Cursos</span>
+  </button>
+  <button mat-menu-item routerLink="/components/cursos/nuevo">
+    <mat-icon>add_circle</mat-icon>
+    <span>Registrar Curso</span>
+  </button>
+</mat-menu>
+
+<!-- Menú Usuarios -->
+<mat-menu #menuUsuarios="matMenu" class="custom-menu">
+  <button mat-menu-item routerLink="/components/users">
+    <mat-icon>list</mat-icon>
+    <span>Listar Usuarios</span>
+  </button>
+  <button mat-menu-item routerLink="/components/users/nuevo">
+    <mat-icon>person_add</mat-icon>
+    <span>Registrar Usuario</span>
+  </button>
+</mat-menu>
+
+<!-- Menú Estudiantes -->
+<mat-menu #menuEstudiante="matMenu" class="custom-menu">
+  <button mat-menu-item routerLink="/components/estudiantes">
+    <mat-icon>list</mat-icon>
+    <span>Listar Estudiantes</span>
+  </button>
+  <button mat-menu-item routerLink="/components/estudiantes/nuevo">
+    <mat-icon>person_add</mat-icon>
+    <span>Registrar Estudiante</span>
+  </button>
+</mat-menu>
+
+<!-- Menú Competencias -->
+<mat-menu #menuCompetencias="matMenu" class="custom-menu">
+  <button mat-menu-item routerLink="/components/competencias">
+    <mat-icon>list</mat-icon>
+    <span>Listar Competencias</span>
+  </button>
+  <button mat-menu-item routerLink="/components/competencias/nuevo">
+    <mat-icon>add_circle</mat-icon>
+    <span>Registrar Competencia</span>
+  </button>
+</mat-menu>
+
+<mat-menu #menuNotas="matMenu" class="custom-menu">
+  <button mat-menu-item routerLink="/components/notas">
+    <mat-icon>list</mat-icon>
+    <span>Listar Notas</span>
+  </button>
+  <button mat-menu-item routerLink="/components/notas/nuevo">
+    <mat-icon>add_circle</mat-icon>
+    <span>Registrar Nota</span>
+  </button>
+</mat-menu>
+
+<!-- Menú Asignaciones -->
+<mat-menu #menuAsignaciones="matMenu" class="custom-menu">
+  <button mat-menu-item routerLink="/components/asignaciones">
+    <mat-icon>list</mat-icon>
+    <span>Listar Asignaciones</span>
+  </button>
+  <button mat-menu-item routerLink="/components/asignaciones/nuevo">
+    <mat-icon>add_circle</mat-icon>
+    <span>Nueva Asignación</span>
+  </button>
+</mat-menu>
+
+<!-- Menú Análisis -->
+<mat-menu #menuAnalisis="matMenu" class="custom-menu">
+  <button mat-menu-item routerLink="/components/panel-riesgo">
+    <mat-icon>warning</mat-icon>
+    <span>Panel de Riesgo</span>
+  </button>
+  <button mat-menu-item routerLink="/components/dashboard-grado">
+    <mat-icon>analytics</mat-icon>
+    <span>Dashboard por Grado</span>
+  </button>
+</mat-menu>
+
+<!-- ========== NUEVOS MENÚS PARA DOCENTES ========== -->
+
+<!-- Menú Notas Docente -->
+<mat-menu #menuNotasDocente="matMenu" class="custom-menu">
+  <button mat-menu-item routerLink="/components/notas">
+    <mat-icon>list</mat-icon>
+    <span>Ver Todas las Notas</span>
+  </button>
+  <button mat-menu-item routerLink="/components/notas/nuevo">
+    <mat-icon>add_circle</mat-icon>
+    <span>Registrar Nota</span>
+  </button>
+  <button mat-menu-item routerLink="/components/docente/filtro-notas">
+    <mat-icon>filter_list</mat-icon>
+    <span>Filtrar Notas (HU-15)</span>
+  </button>
+</mat-menu>
+
+<!-- Menú Reportes Docente -->
+<mat-menu #menuReportesDocente="matMenu" class="custom-menu">
+  <button mat-menu-item routerLink="/components/docente/distribucion-calificaciones">
+    <mat-icon>bar_chart</mat-icon>
+    <span>Distribución por Competencia (HU-16)</span>
+  </button>
+  <button mat-menu-item routerLink="/components/docente/competencias-riesgo">
+    <mat-icon>analytics</mat-icon>
+    <span>Competencias con Mayor Riesgo (HU-17)</span>
+  </button>
+</mat-menu>
+
+<!-- Menú Análisis Docente -->
+<mat-menu #menuAnalisisDocente="matMenu" class="custom-menu">
+  <button mat-menu-item routerLink="/components/docente/evolucion-competencia">
+    <mat-icon>show_chart</mat-icon>
+    <span>Evolución por Estudiante (HU-13)</span>
+  </button>
+  <button mat-menu-item routerLink="/components/panel-riesgo">
+    <mat-icon>warning</mat-icon>
+    <span>Ver Panel de Riesgo</span>
+  </button>
+</mat-menu>
+
+<!-- Menú Usuario -->
+<mat-menu #menuUsuario="matMenu" class="custom-menu user-menu">
+  <div class="user-menu-header">
+    <mat-icon class="user-avatar">account_circle</mat-icon>
+    <div class="user-info">
+      <span class="user-menu-name">{{username}}</span>
+      <span class="user-menu-role">{{role}}</span>
+    </div>
+  </div>
+  <mat-divider></mat-divider>
+  <button mat-menu-item routerLink="/components/welcome">
+    <mat-icon>home</mat-icon>
+    <span>Inicio</span>
+  </button>
+
+  <mat-divider></mat-divider>
+  <button mat-menu-item (click)="cerrar()" class="logout-button">
+    <mat-icon>logout</mat-icon>
+    <span>Cerrar Sesión</span>
+  </button>
+</mat-menu>
+
+<router-outlet></router-outlet>

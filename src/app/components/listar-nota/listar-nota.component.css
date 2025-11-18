@@ -1,0 +1,130 @@
+.list-container {
+    padding: 20px;
+}
+
+mat-card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+mat-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    margin: -16px -16px 20px -16px;
+    border-radius: 4px 4px 0 0;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.header-content h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.search-field {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+}
+
+th.mat-header-cell {
+    background-color: #f5f5f5;
+    font-weight: 600;
+    color: #333;
+}
+
+.student-cell,
+.competencia-cell,
+.periodo-cell,
+.docente-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cell-icon {
+    color: #667eea;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.calificacion-cell {
+    text-align: center;
+}
+
+mat-chip {
+    font-weight: 600;
+    border-radius: 12px;
+    padding: 4px 12px;
+}
+
+/* Estados académicos */
+.estado-riesgo {
+    background-color: #ffebee !important;
+    color: #c62828 !important;
+}
+
+.estado-regular {
+    background-color: #fff3e0 !important;
+    color: #ef6c00 !important;
+}
+
+.estado-satisfactorio {
+    background-color: #e3f2fd !important;
+    color: #1565c0 !important;
+}
+
+.estado-destacado {
+    background-color: #e8f5e9 !important;
+    color: #2e7d32 !important;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.no-data-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #999;
+}
+
+.no-data-container mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .header-content button {
+        width: 100%;
+    }
+}

@@ -1,0 +1,208 @@
+<div class="dashboard-container">
+    <!-- Header -->
+    <mat-card class="header-card">
+        <mat-card-header>
+            <div class="header-content">
+                <div class="header-info">
+                    <h2>
+                        <mat-icon>analytics</mat-icon>
+                        Dashboard de Análisis por Grado
+                    </h2>
+                    <p>Visualización y análisis de rendimiento académico</p>
+                </div>
+            </div>
+        </mat-card-header>
+    </mat-card>
+
+    <!-- Filtros -->
+    <mat-card class="filter-card">
+        <mat-card-content>
+            <form [formGroup]="filterForm" class="filter-form">
+                <mat-form-field appearance="outline">
+                    <mat-label>Grado</mat-label>
+                    <mat-select formControlName="grado">
+                        <mat-option *ngFor="let grado of grados" [value]="grado.value">
+                            {{ grado.viewValue }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-icon matPrefix>class</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Sección</mat-label>
+                    <mat-select formControlName="seccion">
+                        <mat-option *ngFor="let seccion of secciones" [value]="seccion.value">
+                            {{ seccion.viewValue }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-icon matPrefix>groups</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Periodo</mat-label>
+                    <mat-select formControlName="periodo">
+                        <mat-option *ngFor="let periodo of periodos" [value]="periodo.value">
+                            {{ periodo.viewValue }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-icon matPrefix>calendar_today</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>Año</mat-label>
+                    <input matInput type="number" formControlName="anio">
+                    <mat-icon matPrefix>event</mat-icon>
+                </mat-form-field>
+
+                <button mat-raised-button color="primary" (click)="generarReporte()"
+                    [disabled]="isLoading || !filterForm.valid">
+                    <mat-icon>refresh</mat-icon>
+                    Generar Reporte
+                </button>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="isLoading">
+        <mat-spinner></mat-spinner>
+        <p>Generando análisis...</p>
+    </div>
+
+    <!-- Estadísticas Principales -->
+    <div class="stats-grid" *ngIf="!isLoading">
+        <mat-card class="stat-card primary">
+            <mat-card-content>
+                <div class="stat-content">
+                    <mat-icon>school</mat-icon>
+                    <div class="stat-info">
+                        <h3>{{ totalEstudiantes }}</h3>
+                        <p>Total Estudiantes</p>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card success">
+            <mat-card-content>
+                <div class="stat-content">
+                    <mat-icon>assessment</mat-icon>
+                    <div class="stat-info">
+                        <h3>{{ promedioGrado>=0?promedioGrado.toFixed(2):0 }}</h3>
+                        <p>Promedio del Grado</p>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card warning">
+            <mat-card-content>
+                <div class="stat-content">
+                    <mat-icon>warning</mat-icon>
+                    <div class="stat-info">
+                        <h3>{{ estudiantesRiesgo }}</h3>
+                        <p>En Riesgo Académico</p>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card info">
+            <mat-card-content>
+                <div class="stat-content">
+                    <mat-icon>stars</mat-icon>
+                    <div class="stat-info">
+                        <h3>{{ mejorPromedio>=0? mejorPromedio.toFixed(2):0 }}</h3>
+                        <p>Mejor Calificación</p>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <br>
+
+    <!-- Análisis y Conclusiones -->
+    <mat-card class="analysis-card" *ngIf="!isLoading">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>insights</mat-icon>
+                Análisis y Conclusiones
+            </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="analysis-section">
+                <div class="analysis-item" [class.alert]="promedioGrado < 11">
+                    <mat-icon>{{ promedioGrado >= 14 ? 'check_circle' : promedioGrado >= 11 ? 'info' : 'error'
+                        }}</mat-icon>
+                    <div class="analysis-content">
+                        <h4>Rendimiento General</h4>
+                        <p *ngIf="promedioGrado >= 14">
+                            El grado presenta un rendimiento <strong>destacado</strong> con un promedio de {{
+                            promedioGrado.toFixed(2) }}.
+                            Continuar con las estrategias actuales.
+                        </p>
+                        <p *ngIf="promedioGrado >= 11 && promedioGrado < 14">
+                            El grado presenta un rendimiento <strong>aceptable</strong> con un promedio de {{
+                            promedioGrado.toFixed(2) }}.
+                            Se recomienda implementar estrategias para mejorar el desempeño.
+                        </p>
+                        <p *ngIf="promedioGrado < 11">
+                            El grado presenta un rendimiento <strong>preocupante</strong> con un promedio de {{
+                            promedioGrado.toFixed(2) }}.
+                            Se requiere intervención urgente y plan de mejora.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="analysis-item" [class.alert]="estudiantesRiesgo > 0">
+                    <mat-icon>{{ estudiantesRiesgo === 0 ? 'check_circle' : 'warning' }}</mat-icon>
+                    <div class="analysis-content">
+                        <h4>Estudiantes en Riesgo</h4>
+                        <p *ngIf="estudiantesRiesgo === 0">
+                            ¡Excelente! No hay estudiantes en riesgo académico en este periodo.
+                        </p>
+                        <p *ngIf="estudiantesRiesgo > 0">
+                            Hay <strong>{{ estudiantesRiesgo }}</strong> estudiante(s) en riesgo académico
+                            ({{ ((estudiantesRiesgo / totalEstudiantes) * 100).toFixed(1) }}% del total).
+                            <br>Se recomienda:
+                        </p>
+                        <ul *ngIf="estudiantesRiesgo > 0">
+                            <li>Implementar tutorías personalizadas</li>
+                            <li>Reuniones con padres de familia</li>
+                            <li>Plan de reforzamiento específico</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="analysis-item">
+                    <mat-icon>stars</mat-icon>
+                    <div class="analysis-content">
+                        <h4>Áreas de Fortaleza</h4>
+                        <p>
+                            Las competencias mejor desarrolladas muestran oportunidades para replicar
+                            las estrategias exitosas en otras áreas. Revisar el gráfico de competencias
+                            para identificar patrones.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Acciones Rápidas -->
+    <div class="action-buttons" *ngIf="!isLoading">
+        <button mat-raised-button color="primary" routerLink="/components/panel-riesgo">
+            <mat-icon>warning</mat-icon>
+            Ver Panel de Riesgo
+        </button>
+        <button mat-raised-button color="accent">
+            <mat-icon>download</mat-icon>
+            Exportar Reporte PDF
+        </button>
+        <button mat-stroked-button>
+            <mat-icon>share</mat-icon>
+            Compartir Análisis
+        </button>
+    </div>
+</div>

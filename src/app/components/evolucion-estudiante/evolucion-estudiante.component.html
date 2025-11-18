@@ -1,0 +1,176 @@
+<div class="evolucion-container">
+    <!-- Header -->
+    <mat-card class="header-card">
+        <mat-card-header>
+            <div class="header-content">
+                <div class="header-left">
+                    <button mat-icon-button routerLink="/components/panel-riesgo">
+                        <mat-icon>arrow_back</mat-icon>
+                    </button>
+                    <div class="header-info">
+                        <h2>{{ nombreEstudiante }}</h2>
+                        <p>Análisis de Evolución Académica</p>
+                    </div>
+                </div>
+                <mat-icon class="header-icon">timeline</mat-icon>
+            </div>
+        </mat-card-header>
+    </mat-card>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="isLoading">
+        <mat-spinner></mat-spinner>
+        <p>Cargando datos del estudiante...</p>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="stats-grid" *ngIf="!isLoading">
+        <mat-card class="stat-card">
+            <mat-card-content>
+                <div class="stat-content">
+                    <mat-icon class="stat-icon primary">assessment</mat-icon>
+                    <div class="stat-info">
+                        <h3>{{ promedioGeneral.toFixed(2) }}</h3>
+                        <p>Promedio General</p>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+            <mat-card-content>
+                <div class="stat-content">
+                    <mat-icon class="stat-icon success">trending_up</mat-icon>
+                    <div class="stat-info">
+                        <h3>{{ mejorNota }}</h3>
+                        <p>Mejor Nota</p>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card">
+            <mat-card-content>
+                <div class="stat-content">
+                    <mat-icon class="stat-icon warning">trending_down</mat-icon>
+                    <div class="stat-info">
+                        <h3>{{ peorNota }}</h3>
+                        <p>Nota Más Baja</p>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card" [class.mejora]="tendencia === 'mejora'"
+            [class.retroceso]="tendencia === 'retroceso'" [class.estable]="tendencia === 'estable'">
+            <mat-card-content>
+                <div class="stat-content">
+                    <mat-icon class="stat-icon" *ngIf="tendencia === 'mejora'">arrow_upward</mat-icon>
+                    <mat-icon class="stat-icon" *ngIf="tendencia === 'retroceso'">arrow_downward</mat-icon>
+                    <mat-icon class="stat-icon" *ngIf="tendencia === 'estable'">remove</mat-icon>
+                    <div class="stat-info">
+                        <h3>{{ tendencia === 'mejora' ? 'Mejorando' : tendencia === 'retroceso' ? 'En Retroceso' :
+                            'Estable' }}</h3>
+                        <p>Tendencia</p>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="charts-grid" *ngIf="!isLoading">
+        <!-- Gráfico de Evolución -->
+        <mat-card class="chart-card">
+            <mat-card-content>
+                <div class="chart-container">
+                    <canvas id="chartEvolucion"></canvas>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Gráfico por Competencias -->
+        <mat-card class="chart-card">
+            <mat-card-content>
+                <div class="chart-container">
+                    <canvas id="chartCompetencias"></canvas>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Interpretación y Recomendaciones -->
+    <mat-card class="recommendations-card" *ngIf="!isLoading">
+        <mat-card-header>
+            <mat-card-title>
+                <mat-icon>lightbulb</mat-icon>
+                Interpretación y Recomendaciones
+            </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="recommendation-section" *ngIf="tendencia === 'mejora'">
+                <mat-icon class="rec-icon success">check_circle</mat-icon>
+                <div class="rec-content">
+                    <h4>Progreso Positivo</h4>
+                    <p>El estudiante muestra una tendencia de mejora en sus calificaciones. Se recomienda mantener las
+                        estrategias actuales y reforzar las áreas que aún presentan dificultad.</p>
+                </div>
+            </div>
+
+            <div class="recommendation-section" *ngIf="tendencia === 'retroceso'">
+                <mat-icon class="rec-icon warning">warning</mat-icon>
+                <div class="rec-content">
+                    <h4>Requiere Atención</h4>
+                    <p>Se observa una tendencia de retroceso. Es importante identificar las causas y brindar apoyo
+                        adicional. Considere:</p>
+                    <ul>
+                        <li>Sesiones de reforzamiento personalizado</li>
+                        <li>Reunión con padres de familia</li>
+                        <li>Evaluación de factores externos que puedan estar afectando el rendimiento</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="recommendation-section" *ngIf="tendencia === 'estable'">
+                <mat-icon class="rec-icon info">info</mat-icon>
+                <div class="rec-content">
+                    <h4>Rendimiento Estable</h4>
+                    <p>El estudiante mantiene un rendimiento consistente.
+                        {{ promedioGeneral >= 14 ? 'Continuar con el buen trabajo y explorar nuevos desafíos.' : 'Se
+                        recomienda implementar estrategias para mejorar el desempeño.' }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="recommendation-section" *ngIf="promedioGeneral < 11">
+                <mat-icon class="rec-icon error">error</mat-icon>
+                <div class="rec-content">
+                    <h4>Plan de Acción Urgente</h4>
+                    <p>El promedio actual está por debajo de la nota mínima aprobatoria. Acciones recomendadas:</p>
+                    <ul>
+                        <li>Reunión inmediata con tutor y padres</li>
+                        <li>Plan de recuperación personalizado</li>
+                        <li>Evaluación psicopedagógica si es necesario</li>
+                        <li>Monitoreo semanal del progreso</li>
+                    </ul>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Botones de acción -->
+    <div class="action-buttons" *ngIf="!isLoading">
+        <button mat-raised-button color="primary" routerLink="/components/notas/nuevo">
+            <mat-icon>add</mat-icon>
+            Registrar Nueva Nota
+        </button>
+        <button mat-stroked-button color="accent">
+            <mat-icon>download</mat-icon>
+            Exportar Reporte
+        </button>
+        <button mat-stroked-button routerLink="/components/panel-riesgo">
+            <mat-icon>arrow_back</mat-icon>
+            Volver al Panel
+        </button>
+    </div>
+</div>

@@ -1,0 +1,129 @@
+<div class="container">
+    <mat-card class="filter-card">
+        <mat-card-header>
+            <mat-card-title>
+                <h2>
+                    <mat-icon>bar_chart</mat-icon>
+                    Distribución de Calificaciones por Competencia
+                </h2>
+                <p class="subtitle">HU-16: Visualice el rendimiento de los estudiantes por niveles de logro</p>
+            </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <form [formGroup]="filterForm">
+                <div class="filter-row">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Curso</mat-label>
+                        <mat-select formControlName="idCurso">
+                            <mat-option *ngFor="let asignacion of cursosDocente" [value]="asignacion.idCurso">
+                                {{ asignacion.nombreCurso }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>book</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Competencia</mat-label>
+                        <mat-select formControlName="idCompetencia" [disabled]="!filterForm.get('idCurso')?.value">
+                            <mat-option *ngFor="let competencia of competenciasCurso"
+                                [value]="competencia.idCompetencia">
+                                {{ competencia.nombreCompetencia }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>stars</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Sección</mat-label>
+                        <mat-select formControlName="seccion" [disabled]="!filterForm.get('idCurso')?.value">
+                            <mat-option *ngFor="let seccion of seccionesDocente" [value]="seccion">
+                                Sección {{ seccion }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>class</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <div class="filter-row">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Periodo</mat-label>
+                        <mat-select formControlName="periodo">
+                            <mat-option *ngFor="let periodo of periodos" [value]="periodo.value">
+                                {{ periodo.viewValue }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>calendar_today</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Año Académico</mat-label>
+                        <input matInput type="number" formControlName="anio">
+                        <mat-icon matPrefix>event</mat-icon>
+                    </mat-form-field>
+
+                    <button mat-raised-button color="primary" (click)="generarGrafico()"
+                        [disabled]="!filterForm.valid || isLoading" class="search-button">
+                        <mat-icon>assessment</mat-icon>
+                        Generar Gráfico
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Estadísticas -->
+    <div class="stats-container" *ngIf="distribucionData">
+        <mat-card class="stat-card ad">
+            <div class="stat-content">
+                <h3>{{ distribucionData.AD || 0 }}</h3>
+                <p>AD - Logro Destacado</p>
+            </div>
+        </mat-card>
+
+        <mat-card class="stat-card a">
+            <div class="stat-content">
+                <h3>{{ distribucionData.A || 0 }}</h3>
+                <p>A - Logro Esperado</p>
+            </div>
+        </mat-card>
+
+        <mat-card class="stat-card b">
+            <div class="stat-content">
+                <h3>{{ distribucionData.B || 0 }}</h3>
+                <p>B - En Proceso</p>
+            </div>
+        </mat-card>
+
+        <mat-card class="stat-card c">
+            <div class="stat-content">
+                <h3>{{ distribucionData.C || 0 }}</h3>
+                <p>C - En Inicio</p>
+            </div>
+        </mat-card>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="charts-container" *ngIf="distribucionData && !isLoading">
+        <mat-card class="chart-card">
+            <mat-card-content>
+                <div class="chart-wrapper">
+                    <canvas id="chartBarras"></canvas>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="chart-card">
+            <mat-card-content>
+                <div class="chart-wrapper">
+                    <canvas id="chartTorta"></canvas>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <div class="loading-container" *ngIf="isLoading">
+        <mat-spinner></mat-spinner>
+        <p>Generando gráficos...</p>
+    </div>
+</div>

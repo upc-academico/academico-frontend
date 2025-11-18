@@ -1,0 +1,117 @@
+<div class="form-container">
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title>
+                <h2>{{ edicion ? 'Editar Asignación' : 'Nueva Asignación Docente' }}</h2>
+            </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <form [formGroup]="form" class="asignacion-form">
+
+                <!-- Docente -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Docente</mat-label>
+                    <mat-select formControlName="idDocente" required>
+                        <mat-option *ngFor="let docente of listaDocentes" [value]="docente.id">
+                            {{ docente.nombres }} {{ docente.apellidos }} - {{ docente.username }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-icon matPrefix>person</mat-icon>
+                    <mat-error *ngIf="form.get('idDocente')?.hasError('required')">
+                        Seleccione un docente
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Curso -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Curso</mat-label>
+                    <mat-select formControlName="idCurso" required>
+                        <mat-option *ngFor="let curso of listaCursos" [value]="curso.idCurso">
+                            {{ curso.nombreCurso }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-icon matPrefix>book</mat-icon>
+                    <mat-error *ngIf="form.get('idCurso')?.hasError('required')">
+                        Seleccione un curso
+                    </mat-error>
+                </mat-form-field>
+
+                <div class="form-row">
+                    <!-- Grado -->
+                    <mat-form-field appearance="outline" class="half-width">
+                        <mat-label>Grado</mat-label>
+                        <mat-select formControlName="grado" required>
+                            <mat-option *ngFor="let grado of grados" [value]="grado.value">
+                                {{ grado.viewValue }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>class</mat-icon>
+                        <mat-error *ngIf="form.get('grado')?.hasError('required')">
+                            Seleccione el grado
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- Sección -->
+                    <mat-form-field appearance="outline" class="half-width">
+                        <mat-label>Sección</mat-label>
+                        <mat-select formControlName="seccion" required>
+                            <mat-option *ngFor="let seccion of secciones" [value]="seccion.value">
+                                {{ seccion.viewValue }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-icon matPrefix>groups</mat-icon>
+                        <mat-error *ngIf="form.get('seccion')?.hasError('required')">
+                            Seleccione la sección
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Año Académico -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Año Académico</mat-label>
+                    <input matInput type="number" formControlName="anioAcademico" min="2020" required>
+                    <mat-icon matPrefix>calendar_today</mat-icon>
+                    <mat-hint>Año lectivo en el que aplica la asignación</mat-hint>
+                    <mat-error *ngIf="form.get('anioAcademico')?.hasError('required')">
+                        Ingrese el año académico
+                    </mat-error>
+                    <mat-error *ngIf="form.get('anioAcademico')?.hasError('min')">
+                        El año debe ser mayor a 2020
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Mensaje de error -->
+                <mat-error *ngIf="mensaje" class="error-message">
+                    <mat-icon>error</mat-icon>
+                    {{ mensaje }}
+                </mat-error>
+
+                <!-- Información adicional -->
+                <mat-card class="info-card">
+                    <mat-card-content>
+                        <div class="info-content">
+                            <mat-icon>info</mat-icon>
+                            <p>
+                                Esta asignación vincula al docente seleccionado con el curso, grado y sección
+                                especificados
+                                para el año académico indicado. Asegúrese de que no exista una asignación duplicada.
+                            </p>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+            </form>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+            <button mat-stroked-button color="warn" (click)="cancelar()" [disabled]="isLoading">
+                Cancelar
+            </button>
+            <button mat-raised-button color="primary" (click)="aceptar()" [disabled]="!form.valid || isLoading">
+                <mat-spinner diameter="20" *ngIf="isLoading" class="spinner"></mat-spinner>
+                <span *ngIf="!isLoading">{{ edicion ? 'Actualizar' : 'Registrar' }}</span>
+            </button>
+        </mat-card-actions>
+    </mat-card>
+</div>

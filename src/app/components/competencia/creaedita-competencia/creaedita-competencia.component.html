@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <div class="container" style="text-align: center">
+        <h2>Registro de Competencias</h2>
+        <form [formGroup]="form" (submit)="aceptar()" class="example-form">
+
+          <mat-form-field class="example-full-width" *ngIf="edicion">
+            <mat-label>id</mat-label>
+            <input matInput placeholder="Id" formControlName="idCompetencia" [readonly]="true" />
+          </mat-form-field>
+          <br />
+
+            <!--ID CURSO-->
+            <mat-form-field class="example-full-width">
+                <mat-label>Curso</mat-label>
+                <mat-select formControlName="curso" >
+                    <mat-option *ngFor="let c of listaCursos" [value]="c.idCurso" [disabled]="edicion">
+                        {{ c.nombreCurso }} <!-- Replace with the actual property representing the user name -->
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="obtenerControlCampo('curso')?.errors?.['required']">
+                    El Curso es obligatorio.
+                </mat-error>
+            </mat-form-field>
+
+            <br />
+            <mat-form-field class="example-full-width">
+            <mat-label>Nombre de la competencia</mat-label>
+            <input
+              matInput
+              placeholder="Nombre de competencia"
+              formControlName="nombreCompetencia"
+            />
+            <mat-error
+              *ngIf="obtenerControlCampo('nombreCompetencia')?.errors?.['required']"
+            >
+              El nombre es obligatorio
+            </mat-error>
+          </mat-form-field>
+            
+            <!--BOTONES-->
+            <div class="botones">
+            <button mat-raised-button color="primary"> <!-- ALTERNATIVA ANGULAR MATERIAL BUTTON mat-raised-button -->
+                Aceptar</button>
+            <button mat-raised-button color="warn" routerLink="/components/competencias">
+                Cancelar</button>
+            </div>
+            <p>{{ mensaje }}</p>
+        </form>
+    </div>
+
+</body>
+</html>

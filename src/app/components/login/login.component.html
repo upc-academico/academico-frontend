@@ -1,0 +1,48 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="logo-container">
+      <img src="assets/logo1.png" alt="Logo de la empresa" class="logo">
+    </div>
+
+    <h2 class="login-title">Iniciar Sesión</h2>
+
+    <form class="login-form" (ngSubmit)="login()">
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Usuario</mat-label>
+        <input matInput placeholder="Ingrese su usuario" [(ngModel)]="username" name="username" required
+          autocomplete="username">
+        <mat-icon matPrefix>person</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Contraseña</mat-label>
+        <input [type]="hidePassword ? 'password' : 'text'" matInput placeholder="Ingrese su contraseña"
+          [(ngModel)]="password" name="password" required autocomplete="current-password">
+        <mat-icon matPrefix>lock</mat-icon>
+        <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword"
+          [attr.aria-label]="'Ocultar contraseña'" [attr.aria-pressed]="hidePassword">
+          <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit" class="login-button full-width">
+        Ingresar
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+    </div>
+
+    <div class="divider">
+      <span>O</span>
+    </div>
+
+    <div class="register-section">
+      <p class="register-text">¿No tienes una cuenta?</p>
+      <button mat-stroked-button color="primary" class="register-button full-width" routerLink="/components/register">
+        Crear cuenta nueva
+      </button>
+    </div>
+  </div>
+</div>

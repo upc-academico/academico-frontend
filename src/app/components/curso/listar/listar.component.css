@@ -1,0 +1,126 @@
+.container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 500;
+  color: #333;
+}
+
+.header-section button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 24px;
+  height: 42px;
+}
+
+.search-section {
+  margin-bottom: 24px;
+}
+
+.search-field {
+  width: 100%;
+  max-width: 400px;
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  background: white;
+}
+
+table {
+  width: 100%;
+}
+
+th.mat-header-cell {
+  font-weight: 600;
+  font-size: 14px;
+  color: #5f6368;
+  background-color: #f8f9fa;
+}
+
+td.mat-cell {
+  padding: 16px 12px;
+  font-size: 14px;
+}
+
+.codigo-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background-color: #e8f0fe;
+  color: #1967d2;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.nombre-curso {
+  font-weight: 500;
+  color: #202124;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.table-row {
+  transition: background-color 0.2s ease;
+}
+
+.table-row:hover {
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+.paginator {
+  background-color: transparent;
+  margin-top: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .header-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-title {
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .header-section button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .search-field {
+    max-width: 100%;
+  }
+
+  .table-container {
+    border-radius: 4px;
+  }
+}

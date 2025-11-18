@@ -1,0 +1,53 @@
+<div class="container">
+  <div class="form-card mat-elevation-z4">
+    <div class="form-header">
+      <h2 class="form-title">
+        <mat-icon>{{ edicion ? 'edit' : 'add_circle_outline' }}</mat-icon>
+        {{ edicion ? 'Editar Curso' : 'Nuevo Curso' }}
+      </h2>
+      <p class="form-subtitle">
+        {{ edicion ? 'Modifica la información del curso' : 'Completa los datos del nuevo curso' }}
+      </p>
+    </div>
+
+    <form [formGroup]="form" (submit)="aceptar()" class="curso-form">
+
+      <mat-form-field appearance="outline" class="full-width" *ngIf="edicion">
+        <mat-label>Código del Curso</mat-label>
+        <input matInput formControlName="idCurso" readonly />
+        <mat-icon matPrefix>tag</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nombre del Curso</mat-label>
+        <input matInput placeholder="Ej: Desarrollo Web Avanzado" formControlName="nombreCurso" maxlength="100" />
+        <mat-icon matPrefix>school</mat-icon>
+        <mat-hint align="end">
+          {{ form.get('nombreCurso')?.value?.length || 0 }}/100
+        </mat-hint>
+        <mat-error *ngIf="obtenerControlCampo('nombreCurso')?.errors?.['required']">
+          El nombre del curso es obligatorio
+        </mat-error>
+        <mat-error *ngIf="obtenerControlCampo('nombreCurso')?.errors?.['minlength']">
+          El nombre debe tener al menos 3 caracteres
+        </mat-error>
+      </mat-form-field>
+
+      <div class="alert-message" *ngIf="mensaje">
+        <mat-icon>info</mat-icon>
+        <span>{{ mensaje }}</span>
+      </div>
+
+      <div class="form-actions">
+        <button mat-raised-button color="warn" type="button" routerLink="/components/cursos" class="btn-cancel">
+          <mat-icon>close</mat-icon>
+          Cancelar
+        </button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!form.valid" class="btn-submit">
+          <mat-icon>{{ edicion ? 'save' : 'add' }}</mat-icon>
+          {{ edicion ? 'Actualizar' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

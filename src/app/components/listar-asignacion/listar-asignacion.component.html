@@ -1,0 +1,149 @@
+<div class="list-container">
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title>
+                <div class="header-content">
+                    <h2>
+                        <mat-icon>assignment_ind</mat-icon>
+                        Asignaciones de Docentes
+                    </h2>
+                    <div class="header-actions">
+                        <button mat-stroked-button color="accent" (click)="exportarExcel()"
+                            matTooltip="Exportar a Excel">
+                            <mat-icon>download</mat-icon>
+                            Exportar
+                        </button>
+                        <button mat-raised-button color="primary" routerLink="/components/asignaciones/nuevo">
+                            <mat-icon>add</mat-icon>
+                            Nueva Asignación
+                        </button>
+                    </div>
+                </div>
+            </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <!-- Barra de búsqueda -->
+            <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Buscar</mat-label>
+                <input matInput (keyup)="filter($event)" placeholder="Buscar por docente, curso, grado...">
+                <mat-icon matPrefix>search</mat-icon>
+            </mat-form-field>
+
+            <!-- Tabla de asignaciones -->
+            <div class="table-container">
+                <table mat-table [dataSource]="dataSource" class="mat-elevation-z2">
+
+                    <!-- Columna Docente -->
+                    <ng-container matColumnDef="docente">
+                        <th mat-header-cell *matHeaderCellDef>Docente</th>
+                        <td mat-cell *matCellDef="let asignacion">
+                            <div class="cell-content">
+                                <mat-icon class="cell-icon">person</mat-icon>
+                                <div class="cell-info">
+                                    <span class="main-text">{{ asignacion.nombreDocente }}</span>
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Curso -->
+                    <ng-container matColumnDef="curso">
+                        <th mat-header-cell *matHeaderCellDef>Curso/Área</th>
+                        <td mat-cell *matCellDef="let asignacion">
+                            <div class="cell-content">
+                                <mat-icon class="cell-icon course">book</mat-icon>
+                                <span class="main-text">{{ asignacion.nombreCurso }}</span>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Grado -->
+                    <ng-container matColumnDef="grado">
+                        <th mat-header-cell *matHeaderCellDef>Grado</th>
+                        <td mat-cell *matCellDef="let asignacion">
+                            <mat-chip class="grado-chip">
+                                <mat-icon>class</mat-icon>
+                                {{ asignacion.grado }}
+                            </mat-chip>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Sección -->
+                    <ng-container matColumnDef="seccion">
+                        <th mat-header-cell *matHeaderCellDef>Sección</th>
+                        <td mat-cell *matCellDef="let asignacion">
+                            <mat-chip class="seccion-chip">
+                                <mat-icon>groups</mat-icon>
+                                {{ asignacion.seccion }}
+                            </mat-chip>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Año -->
+                    <ng-container matColumnDef="anio">
+                        <th mat-header-cell *matHeaderCellDef>Año Académico</th>
+                        <td mat-cell *matCellDef="let asignacion">
+                            <div class="cell-content">
+                                <mat-icon class="cell-icon year">calendar_today</mat-icon>
+                                <span class="year-text">{{ asignacion.anioAcademico }}</span>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Acciones -->
+                    <ng-container matColumnDef="acciones">
+                        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                        <td mat-cell *matCellDef="let asignacion">
+                            <div class="action-buttons">
+                                <button mat-icon-button color="primary"
+                                    [routerLink]="['/components/asignaciones/ediciones', asignacion.idAsignacion]"
+                                    matTooltip="Editar asignación">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                                <!-- <button mat-icon-button color="accent" matTooltip="Ver detalles"
+                                    (click)="verDetalles(asignacion)"
+                                    >
+                                    <mat-icon>visibility</mat-icon>
+                                </button> -->
+                                <button mat-icon-button color="warn" (click)="eliminar(asignacion.idAsignacion)"
+                                    matTooltip="Eliminar asignación">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+
+                    <!-- Mensaje cuando no hay datos -->
+                    <tr class="mat-row" *matNoDataRow>
+                        <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length">
+                            <div class="no-data-container">
+                                <mat-icon>assignment_late</mat-icon>
+                                <p>No se encontraron asignaciones registradas</p>
+                                <button mat-raised-button color="primary" routerLink="/components/asignaciones/nuevo">
+                                    <mat-icon>add</mat-icon>
+                                    Crear Primera Asignación
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <mat-paginator [pageSizeOptions]="[5, 10, 20, 50]" showFirstLastButtons>
+                </mat-paginator>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="info-panel">
+                <mat-icon>info</mat-icon>
+                <p>
+                    Las asignaciones vinculan a cada docente con los cursos, grados y secciones que dictará
+                    durante el año académico. Asegúrese de mantener esta información actualizada.
+                </p>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>

@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import { NotaService } from 'src/app/services/nota.service';
 import { AsignacionDocenteService } from 'src/app/services/asignacion-docente.service';
 import { CompetenciaService } from 'src/app/services/competencia.service';
@@ -18,7 +20,11 @@ export class FiltroNotasComponent implements OnInit {
 
   filterForm: FormGroup;
   dataSource: MatTableDataSource<Nota> = new MatTableDataSource();
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+  
   isLoading: boolean = false;
+  hasSearched: boolean = false;
 
   currentUserId: number = 0;
   cursosDocente: AsignacionDocente[] = [];
@@ -59,12 +65,16 @@ export class FiltroNotasComponent implements OnInit {
     this.currentUserId = this.getUserIdFromToken();
     this.loadAsignacionesDocente();
 
-    // Escuchar cambios en el curso seleccionado
+    // Listener para cambios en curso
     this.filterForm.get('idCurso')?.valueChanges.subscribe(idCurso => {
       if (idCurso) {
         this.loadCompetenciasPorCurso(idCurso);
         this.loadSeccionesPorCurso(idCurso);
       }
+      this.filterForm.patchValue({ 
+        idCompetencia: '', 
+        seccion: '' 
+      });
     });
   }
 
@@ -75,7 +85,7 @@ export class FiltroNotasComponent implements OnInit {
         const payload = JSON.parse(atob(token.split('.')[1]));
         return payload.userId || 0;
       } catch (error) {
-        console.error('❌ Error decodificando token:', error);
+        console.error('Error decodificando token:', error);
         return 0;
       }
     }
@@ -83,18 +93,18 @@ export class FiltroNotasComponent implements OnInit {
   }
 
   loadAsignacionesDocente(): void {
-    console.log('🔍 Buscando asignaciones para docente ID:', this.currentUserId);
-
     this.adS.findByDocente(this.currentUserId).subscribe({
       next: (data) => {
-        console.log('✅ Datos recibidos:', data);
-        console.log('📊 Cantidad:', data.length);
-        console.log('📝 Primer curso:', data[0]);
-        this.cursosDocente = data;
+        // Eliminar duplicados de cursos
+        const cursosUnicos = new Map<number, AsignacionDocente>();
+        data.forEach(asignacion => {
+          if (!cursosUnicos.has(asignacion.idCurso)) {
+            cursosUnicos.set(asignacion.idCurso, asignacion);
+          }
+        });
+        this.cursosDocente = Array.from(cursosUnicos.values());
       },
-      error: (error) => {
-        console.error('❌ Error:', error);
-      }
+      error: (error) => console.error('Error:', error)
     });
   }
 
@@ -108,15 +118,21 @@ export class FiltroNotasComponent implements OnInit {
   }
 
   loadSeccionesPorCurso(idCurso: number): void {
-    const secciones = this.cursosDocente
-      .filter(a => a.idCurso === idCurso)
-      .map(a => a.seccion);
-    this.seccionesDocente = [...new Set(secciones)];
+    this.adS.findByDocente(this.currentUserId).subscribe({
+      next: (data) => {
+        const secciones = data
+          .filter(a => a.idCurso === idCurso)
+          .map(a => a.seccion);
+        this.seccionesDocente = [...new Set(secciones)];
+      },
+      error: (error) => console.error('Error:', error)
+    });
   }
 
   buscarNotas(): void {
     if (this.filterForm.valid) {
       this.isLoading = true;
+      this.hasSearched = true;
       const { idCurso, idCompetencia, seccion, periodo, anio } = this.filterForm.value;
 
       this.nS.findByDocenteCompetenciaSeccion(
@@ -128,7 +144,7 @@ export class FiltroNotasComponent implements OnInit {
         anio
       ).subscribe({
         next: (data) => {
-          // ⬇️ CORRECCIÓN: Ordenar por calificación (C, B, A, AD)
+          // Ordenar por calificación (C, B, A, AD)
           const ordenCalificacion: { [key: string]: number } = {
             'C': 1,
             'B': 2,
@@ -143,6 +159,17 @@ export class FiltroNotasComponent implements OnInit {
           });
 
           this.dataSource = new MatTableDataSource(data);
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+          
+          // Configurar filtro de búsqueda
+          this.dataSource.filterPredicate = (data: Nota, filter: string) => {
+            const searchStr = filter.toLowerCase();
+            return data.nombreEstudiante.toLowerCase().includes(searchStr) ||
+                   data.nombreCompetencia.toLowerCase().includes(searchStr) ||
+                   data.calificacion.toLowerCase().includes(searchStr);
+          };
+          
           this.isLoading = false;
         },
         error: (error) => {
@@ -150,6 +177,15 @@ export class FiltroNotasComponent implements OnInit {
           this.isLoading = false;
         }
       });
+    }
+  }
+
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
   }
 
@@ -161,5 +197,18 @@ export class FiltroNotasComponent implements OnInit {
       'C': 'cal-c'
     };
     return classes[calificacion] || '';
+  }
+
+  limpiarFiltros(): void {
+    this.filterForm.reset({
+      periodo: 'Bimestre 1',
+      anio: new Date().getFullYear()
+    });
+    this.dataSource = new MatTableDataSource();
+    this.hasSearched = false;
+  }
+
+  exportarExcel(): void {
+    console.log('Exportar Excel');
   }
 }

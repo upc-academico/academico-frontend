@@ -14,13 +14,12 @@ import { CreaeditaUsersComponent } from './users/creaedita-users/creaedita-users
 import { RegisterComponent } from './register/register.component';
 import { PanelRiesgoComponent } from './panel-riesgo/panel-riesgo.component';
 import { EvolucionEstudianteComponent } from './evolucion-estudiante/evolucion-estudiante.component';
-import { DashboardGradoComponent } from './dashboard-grado/dashboard-grado.component';
 import { ListarNotaComponent } from './listar-nota/listar-nota.component';
 import { CreaeditaNotaComponent } from './creaedita-nota/creaedita-nota.component';
 import { ListarAsignacionComponent } from './listar-asignacion/listar-asignacion.component';
 import { CreaeditaAsignacionComponent } from './creaedita-asignacion/creaedita-asignacion.component';
 
-// ⬇️ NUEVOS COMPONENTES (HU-13, 15, 16, 17)
+// Componentes de docentes (HU-13, 15, 16, 17)
 import { FiltroNotasComponent } from './docente/filtro-notas/filtro-notas.component';
 import { DistribucionCalificacionesComponent } from './docente/distribucion-calificaciones/distribucion-calificaciones.component';
 import { CompetenciasRiesgoComponent } from './docente/competencias-riesgo/competencias-riesgo.component';
@@ -98,7 +97,7 @@ const routes: Routes = [
     canActivate: [GuardService],
   },
 
-  // ⬇️ RUTAS PARA DIRECTOR (ADMIN)
+  // Rutas para ADMIN y DOCENTES
   {
     path: 'panel-riesgo',
     component: PanelRiesgoComponent,
@@ -111,13 +110,7 @@ const routes: Routes = [
     canActivate: [GuardService],
   },
 
-  {
-    path: 'dashboard-grado',
-    component: DashboardGradoComponent,
-    canActivate: [GuardService],
-  },
-
-  // ⬇️ NUEVAS RUTAS PARA DOCENTES (HU-13, 15, 16, 17)
+  // Rutas para DOCENTES (HU-13, 15, 16, 17)
   {
     path: 'docente/filtro-notas',
     component: FiltroNotasComponent,

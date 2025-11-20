@@ -1,130 +1,130 @@
-.list-container {
-    padding: 20px;
+.container {
+  padding: 24px;
 }
 
 mat-card {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-mat-card-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px;
-    margin: -16px -16px 20px -16px;
-    border-radius: 4px 4px 0 0;
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 24px;
+  margin: -16px -16px 24px -16px;
 }
 
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
+mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+  margin: 0;
 }
 
-.header-content h2 {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-    font-size: 24px;
-    font-weight: 500;
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .search-field {
-    width: 100%;
-    margin-bottom: 20px;
+  flex: 1;
+  min-width: 300px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
 }
 
 .table-container {
-    overflow-x: auto;
+  overflow-x: auto;
+  margin-bottom: 16px;
 }
 
 table {
-    width: 100%;
+  width: 100%;
 }
 
-th.mat-header-cell {
-    background-color: #f5f5f5;
-    font-weight: 600;
-    color: #333;
+th {
+  background: #f5f5f5;
+  font-weight: 600;
+  color: #333;
 }
 
-.student-cell,
-.competencia-cell,
-.periodo-cell,
-.docente-cell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.student-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.cell-icon {
-    color: #667eea;
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+.student-icon {
+  color: #667eea;
 }
 
-.calificacion-cell {
-    text-align: center;
+.curso-chip {
+  background: #e3f2fd;
+  color: #1976d2;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 16px;
 }
 
-mat-chip {
-    font-weight: 600;
-    border-radius: 12px;
-    padding: 4px 12px;
+.calificacion-badge {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  display: inline-block;
 }
 
-/* Estados académicos */
-.estado-riesgo {
-    background-color: #ffebee !important;
-    color: #c62828 !important;
+.cal-ad {
+  background: #4caf50;
+  color: white;
 }
 
-.estado-regular {
-    background-color: #fff3e0 !important;
-    color: #ef6c00 !important;
+.cal-a {
+  background: #2196f3;
+  color: white;
 }
 
-.estado-satisfactorio {
-    background-color: #e3f2fd !important;
-    color: #1565c0 !important;
+.cal-b {
+  background: #ff9800;
+  color: white;
 }
 
-.estado-destacado {
-    background-color: #e8f5e9 !important;
-    color: #2e7d32 !important;
+.cal-c {
+  background: #f44336;
+  color: white;
 }
 
-.action-buttons {
-    display: flex;
-    gap: 5px;
+.observacion-text {
+  display: block;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.no-data-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px;
-    color: #999;
-}
-
-.no-data-container mat-icon {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-    margin-bottom: 10px;
-}
-
+/* Responsive */
 @media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        gap: 15px;
-        align-items: flex-start;
-    }
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-    .header-content button {
-        width: 100%;
-    }
+  .search-field {
+    min-width: 100%;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions button {
+    width: 100%;
+  }
 }

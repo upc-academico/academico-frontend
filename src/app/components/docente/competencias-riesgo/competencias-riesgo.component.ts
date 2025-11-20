@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NotaService } from 'src/app/services/nota.service';
 import { AsignacionDocenteService } from 'src/app/services/asignacion-docente.service';
 import { LoginService } from 'src/app/services/login.service';
 import { AsignacionDocente } from 'src/app/models/AsignacionDocente';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -18,6 +20,9 @@ export class CompetenciasRiesgoComponent implements OnInit {
 
   filterForm: FormGroup;
   dataSource: MatTableDataSource<any> = new MatTableDataSource();
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+  
   isLoading: boolean = false;
   currentUserId: number = 0;
 
@@ -65,6 +70,7 @@ export class CompetenciasRiesgoComponent implements OnInit {
       if (idCurso) {
         this.loadSeccionesPorCurso(idCurso);
       }
+      this.filterForm.patchValue({ seccion: '' });
     });
   }
 
@@ -84,17 +90,29 @@ export class CompetenciasRiesgoComponent implements OnInit {
   loadAsignacionesDocente(): void {
     this.adS.findByDocente(this.currentUserId).subscribe({
       next: (data) => {
-        this.cursosDocente = data;
+        // Eliminar duplicados de cursos
+        const cursosUnicos = new Map<number, AsignacionDocente>();
+        data.forEach(asignacion => {
+          if (!cursosUnicos.has(asignacion.idCurso)) {
+            cursosUnicos.set(asignacion.idCurso, asignacion);
+          }
+        });
+        this.cursosDocente = Array.from(cursosUnicos.values());
       },
       error: (error) => console.error('Error:', error)
     });
   }
 
   loadSeccionesPorCurso(idCurso: number): void {
-    const secciones = this.cursosDocente
-      .filter(a => a.idCurso === idCurso)
-      .map(a => a.seccion);
-    this.seccionesDocente = [...new Set(secciones)];
+    this.adS.findByDocente(this.currentUserId).subscribe({
+      next: (data) => {
+        const secciones = data
+          .filter(a => a.idCurso === idCurso)
+          .map(a => a.seccion);
+        this.seccionesDocente = [...new Set(secciones)];
+      },
+      error: (error) => console.error('Error:', error)
+    });
   }
 
   analizarCompetencias(): void {
@@ -118,6 +136,9 @@ export class CompetenciasRiesgoComponent implements OnInit {
           }));
 
           this.dataSource = new MatTableDataSource(processedData);
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+          
           this.crearGrafico(processedData);
           this.isLoading = false;
         },
@@ -150,7 +171,7 @@ export class CompetenciasRiesgoComponent implements OnInit {
       this.chart.destroy();
     }
 
-    if (ctx) {
+    if (ctx && data.length > 0) {
       this.chart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -209,7 +230,10 @@ export class CompetenciasRiesgoComponent implements OnInit {
             y: {
               stacked: false,
               beginAtZero: true,
-              ticks: { stepSize: 1 },
+              ticks: { 
+                stepSize: 1,
+                precision: 0
+              },
               title: {
                 display: true,
                 text: 'Cantidad de Estudiantes'
@@ -218,6 +242,15 @@ export class CompetenciasRiesgoComponent implements OnInit {
           }
         }
       });
+    }
+  }
+
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
   }
 

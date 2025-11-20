@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Nota } from 'src/app/models/Nota';
 import { NotaService } from 'src/app/services/nota.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-listar-nota',
@@ -18,19 +19,21 @@ export class ListarNotaComponent implements OnInit {
 
   displayedColumns: string[] = [
     'estudiante',
+    'curso',
     'competencia',
     'calificacion',
-    'estado',
     'periodo',
     'anio',
     'docente',
+    'observacion',
     'acciones'
   ];
 
   constructor(
     private nS: NotaService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -45,11 +48,21 @@ export class ListarNotaComponent implements OnInit {
     this.nS.list().subscribe((data) => {
       this.dataSource = new MatTableDataSource(data);
       this.dataSource.paginator = this.paginator;
+      
+      // Configurar filtro personalizado
+      this.dataSource.filterPredicate = (data: Nota, filter: string) => {
+        const searchStr = filter.toLowerCase();
+        return data.nombreEstudiante.toLowerCase().includes(searchStr) ||
+               data.nombreCompetencia.toLowerCase().includes(searchStr) ||
+               data.nombreDocente.toLowerCase().includes(searchStr) ||
+               data.calificacion.toLowerCase().includes(searchStr) ||
+               data.periodo.toLowerCase().includes(searchStr);
+      };
     });
   }
 
   eliminar(id: number): void {
-    if (confirm('¿Está seguro de eliminar esta nota?')) {
+    if (confirm('¿Está seguro de eliminar esta nota? Esta acción no se puede deshacer.')) {
       this.nS.delete(id).subscribe({
         next: () => {
           this.nS.list().subscribe((data) => {
@@ -72,17 +85,42 @@ export class ListarNotaComponent implements OnInit {
     }
   }
 
-  filter(event: any): void {
-    this.dataSource.filter = event.target.value.trim().toLowerCase();
+  editar(id: number): void {
+    this.router.navigate(['components/notas/ediciones', id]);
   }
 
-  getEstadoClass(estado: string): string {
-    switch (estado) {
-      case 'En Riesgo': return 'estado-riesgo';
-      case 'Regular': return 'estado-regular';
-      case 'Satisfactorio': return 'estado-satisfactorio';
-      case 'Destacado': return 'estado-destacado';
-      default: return '';
+  filter(event: any): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
+  }
+
+  getCalificacionClass(calificacion: string): string {
+    const classes: { [key: string]: string } = {
+      'AD': 'cal-ad',
+      'A': 'cal-a',
+      'B': 'cal-b',
+      'C': 'cal-c'
+    };
+    return classes[calificacion] || '';
+  }
+
+  getCalificacionColor(calificacion: string): string {
+    const colors: { [key: string]: string } = {
+      'AD': '#4caf50',
+      'A': '#2196f3',
+      'B': '#ff9800',
+      'C': '#f44336'
+    };
+    return colors[calificacion] || '#757575';
+  }
+
+  exportarExcel(): void {
+    this.snackBar.open('Función de exportación en desarrollo', 'Cerrar', {
+      duration: 3000
+    });
   }
 }

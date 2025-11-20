@@ -1,178 +1,167 @@
 <div class="container">
-    <mat-card class="filter-card">
-        <mat-card-header>
-            <mat-card-title>
-                <h2>
-                    <mat-icon>show_chart</mat-icon>
-                    Evolución del Estudiante por Competencia
-                </h2>
-                <p class="subtitle">HU-13: Visualice el progreso de cada estudiante en el tiempo</p>
-            </mat-card-title>
-        </mat-card-header>
+  <mat-card>
+    <mat-card-header class="header">
+      <mat-card-title>
+        <mat-icon>show_chart</mat-icon>
+        Evolución del Estudiante por Competencia
+      </mat-card-title>
+      <mat-card-subtitle>
+        HU-13: Gráficos de evolución del progreso de cada estudiante en el tiempo
+      </mat-card-subtitle>
+    </mat-card-header>
 
-        <mat-card-content>
-            <form [formGroup]="filterForm">
-                <div class="filter-row">
-                    <!-- Curso -->
-                    <mat-form-field appearance="outline">
-                        <mat-label>Curso</mat-label>
-                        <mat-select formControlName="idCurso">
-                            <mat-option *ngFor="let asignacion of cursosDocente" [value]="asignacion.idCurso">
-                                {{ asignacion.nombreCurso }}
-                            </mat-option>
-                        </mat-select>
-                        <mat-icon matPrefix>book</mat-icon>
-                    </mat-form-field>
+    <mat-card-content>
+      <!-- Formulario de filtros -->
+      <form [formGroup]="filterForm" class="filter-form">
+        <div class="filter-grid">
+          <!-- Curso -->
+          <mat-form-field appearance="outline">
+            <mat-label>Curso</mat-label>
+            <mat-select formControlName="idCurso">
+              <mat-option *ngFor="let asignacion of cursosDocente" 
+                          [value]="asignacion.idCurso">
+                {{asignacion.nombreCurso}}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>book</mat-icon>
+            <mat-error>Seleccione un curso</mat-error>
+          </mat-form-field>
 
-                    <!-- Competencia -->
-                    <mat-form-field appearance="outline">
-                        <mat-label>Competencia</mat-label>
-                        <mat-select formControlName="idCompetencia" [disabled]="!filterForm.get('idCurso')?.value">
-                            <mat-option *ngFor="let competencia of competenciasCurso"
-                                [value]="competencia.idCompetencia">
-                                {{ competencia.nombreCompetencia }}
-                            </mat-option>
-                        </mat-select>
-                        <mat-icon matPrefix>stars</mat-icon>
-                    </mat-form-field>
+          <!-- Competencia -->
+          <mat-form-field appearance="outline">
+            <mat-label>Competencia</mat-label>
+            <mat-select formControlName="idCompetencia" 
+                        [disabled]="!filterForm.get('idCurso')?.value">
+              <mat-option *ngFor="let competencia of competenciasCurso" 
+                          [value]="competencia.idCompetencia">
+                {{competencia.nombreCompetencia}}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>stars</mat-icon>
+            <mat-error>Seleccione una competencia</mat-error>
+          </mat-form-field>
 
-                    <!-- Estudiante -->
-                    <mat-form-field appearance="outline">
-                        <mat-label>Estudiante</mat-label>
-                        <mat-select formControlName="idEstudiante" [disabled]="!filterForm.get('idCurso')?.value">
-                            <mat-option *ngFor="let estudiante of estudiantesCurso" [value]="estudiante.idEstudiante">
-                                {{ estudiante.nombres }} {{ estudiante.apellidos }} - {{ estudiante.grado }} {{
-                                estudiante.seccion }}
-                            </mat-option>
-                        </mat-select>
-                        <mat-icon matPrefix>person</mat-icon>
-                    </mat-form-field>
-
-                    <!-- Botón Generar -->
-                    <button mat-raised-button color="primary" (click)="generarGrafico()"
-                        [disabled]="!filterForm.valid || isLoading" class="search-button">
-                        <mat-icon>assessment</mat-icon>
-                        Generar Gráfico
-                    </button>
-                </div>
-            </form>
-        </mat-card-content>
-    </mat-card>
-
-    <!-- Estadísticas -->
-    <div class="stats-container" *ngIf="datosEvolucion.length > 0 && !isLoading">
-        <mat-card class="stat-card">
-            <div class="stat-icon">
-                <mat-icon>person</mat-icon>
-            </div>
-            <div class="stat-content">
-                <h4>Estudiante</h4>
-                <p>{{ nombreEstudiante }}</p>
-            </div>
-        </mat-card>
-
-        <mat-card class="stat-card">
-            <div class="stat-icon">
-                <mat-icon>stars</mat-icon>
-            </div>
-            <div class="stat-content">
-                <h4>Competencia</h4>
-                <p>{{ nombreCompetencia }}</p>
-            </div>
-        </mat-card>
-
-        <mat-card class="stat-card">
-            <div class="stat-icon">
-                <mat-icon>grade</mat-icon>
-            </div>
-            <div class="stat-content">
-                <h4>Nivel Promedio</h4>
-                <p class="calificacion-grande">{{ promedioGeneral }}</p>
-            </div>
-        </mat-card>
-
-        <mat-card class="stat-card" [class]="getTendenciaClass()">
-            <div class="stat-icon">
-                <mat-icon>{{ getTendenciaIcon() }}</mat-icon>
-            </div>
-            <div class="stat-content">
-                <h4>Tendencia</h4>
-                <p>{{ tendencia === 'mejora' ? 'Mejorando' : tendencia === 'retroceso' ? 'Retrocediendo' : 'Estable' }}
-                </p>
-            </div>
-        </mat-card>
-    </div>
-
-    <!-- Gráfico -->
-    <mat-card class="chart-card" *ngIf="datosEvolucion.length > 0 && !isLoading">
-        <mat-card-content>
-            <div class="chart-wrapper">
-                <canvas id="chartEvolucion"></canvas>
-            </div>
-
-            <!-- Leyenda de colores -->
-            <div class="legend">
-                <div class="legend-item">
-                    <span class="legend-color" style="background-color: #4caf50;"></span>
-                    <span>AD - Logro Destacado</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-color" style="background-color: #2196f3;"></span>
-                    <span>A - Logro Esperado</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-color" style="background-color: #ff9800;"></span>
-                    <span>B - En Proceso</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-color" style="background-color: #f44336;"></span>
-                    <span>C - En Inicio</span>
-                </div>
-            </div>
-        </mat-card-content>
-    </mat-card>
-
-    <!-- Tabla de historial -->
-    <mat-card class="history-card" *ngIf="datosEvolucion.length > 0 && !isLoading">
-        <mat-card-header class="history-header">
-            <mat-card-title>
-                <h3>
-                    <mat-icon>history</mat-icon>
-                    Historial de Calificaciones
-                </h3>
-            </mat-card-title>
-        </mat-card-header>
-
-        <mat-card-content>
-            <div class="history-timeline">
-                <div class="timeline-item" *ngFor="let nota of datosEvolucion">
-                    <div class="timeline-marker" [style.background-color]="getColorPorCalificacion(nota.calificacion)">
-                        <span>{{ nota.calificacion }}</span>
-                    </div>
-                    <div class="timeline-content">
-                        <h4>{{ nota.periodo }} {{ nota.anio }}</h4>
-                        <p class="estado">{{ nota.estadoAcademico }}</p>
-                        <p class="observacion" *ngIf="nota.observacion">
-                            <mat-icon>comment</mat-icon>
-                            {{ nota.observacion }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </mat-card-content>
-    </mat-card>
-
-    <!-- Loading -->
-    <div class="loading-container" *ngIf="isLoading">
-        <mat-spinner></mat-spinner>
-        <p>Cargando evolución del estudiante...</p>
-    </div>
-
-    <!-- Sin datos -->
-    <mat-card class="no-data-card" *ngIf="datosEvolucion.length === 0 && !isLoading && filterForm.valid">
-        <div class="no-data-content">
-            <mat-icon>info</mat-icon>
-            <p>No hay registros de calificaciones para este estudiante en esta competencia</p>
+          <!-- Estudiante -->
+          <mat-form-field appearance="outline">
+            <mat-label>Estudiante</mat-label>
+            <mat-select formControlName="idEstudiante"
+                        [disabled]="!filterForm.get('idCurso')?.value">
+              <mat-option *ngFor="let estudiante of estudiantesCurso" 
+                          [value]="estudiante.idEstudiante">
+                {{estudiante.apellidos}}, {{estudiante.nombres}}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>person</mat-icon>
+            <mat-error>Seleccione un estudiante</mat-error>
+          </mat-form-field>
         </div>
-    </mat-card>
+
+        <!-- Botón de búsqueda -->
+        <div class="form-actions">
+          <button mat-raised-button color="primary" 
+                  (click)="generarGrafico()"
+                  [disabled]="!filterForm.valid || isLoading">
+            <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isLoading">analytics</mat-icon>
+            Generar Gráfico
+          </button>
+        </div>
+      </form>
+
+   
+
+      <!-- Estadísticas y gráfico -->
+      <div class="results-container" *ngIf="datosEvolucion.length > 0">
+        <!-- Tarjetas de estadísticas -->
+        <div class="stats-grid">
+          <mat-card class="stat-card">
+            <div class="stat-content">
+              <mat-icon class="stat-icon promedio">assessment</mat-icon>
+              <div class="stat-info">
+                <span class="stat-label">Promedio General</span>
+                <span class="stat-value">{{promedioGeneral}}</span>
+              </div>
+            </div>
+          </mat-card>
+
+          <mat-card class="stat-card">
+            <div class="stat-content">
+              <mat-icon class="stat-icon" [ngClass]="getTendenciaClass()">
+                {{getTendenciaIcon()}}
+              </mat-icon>
+              <div class="stat-info">
+                <span class="stat-label">Tendencia</span>
+                <span class="stat-value">
+                  {{tendencia === 'mejora' ? 'Mejorando' : 
+                    tendencia === 'retroceso' ? 'En Retroceso' : 'Estable'}}
+                </span>
+              </div>
+            </div>
+          </mat-card>
+
+          <mat-card class="stat-card">
+            <div class="stat-content">
+              <mat-icon class="stat-icon registros">calendar_today</mat-icon>
+              <div class="stat-info">
+                <span class="stat-label">Registros</span>
+                <span class="stat-value">{{datosEvolucion.length}}</span>
+              </div>
+            </div>
+          </mat-card>
+        </div>
+
+        <!-- Información del estudiante y competencia -->
+        <div class="info-banner">
+          <div class="info-item">
+            <mat-icon>person</mat-icon>
+            <div>
+              <span class="info-label">Estudiante:</span>
+              <span class="info-value">{{nombreEstudiante}}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <mat-icon>stars</mat-icon>
+            <div>
+              <span class="info-label">Competencia:</span>
+              <span class="info-value">{{nombreCompetencia}}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráfico -->
+        <div class="chart-container">
+          <canvas id="chartEvolucion"></canvas>
+        </div>
+
+        <!-- Leyenda de calificaciones -->
+        <div class="legend-container">
+          <h4>Escala de Calificaciones:</h4>
+          <div class="legend-grid">
+            <div class="legend-item">
+              <span class="legend-color" style="background: #4caf50;"></span>
+              <span>AD - Logro Destacado</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #2196f3;"></span>
+              <span>A - Logro Esperado</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #ff9800;"></span>
+              <span>B - En Proceso</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #f44336;"></span>
+              <span>C - En Inicio</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensaje inicial -->
+      <div class="initial-message" *ngIf="datosEvolucion.length === 0 && !isLoading">
+        <mat-icon>show_chart</mat-icon>
+        <p>Seleccione un curso, competencia y estudiante para visualizar su evolución</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </div>

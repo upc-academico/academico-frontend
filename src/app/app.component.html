@@ -11,73 +11,73 @@
   <!-- Spacer para empujar los elementos a la derecha -->
   <span class="toolbar-spacer"></span>
 
-  <!-- ⬇️ Menú de navegación ADMIN (Director) -->
+  <!-- Menú de navegación ADMIN (Director) -->
   <div class="toolbar-navigation" *ngIf="esAdmin()">
     <button mat-button [matMenuTriggerFor]="menuCursos" class="nav-button">
       <mat-icon>school</mat-icon>
-      <span>Cursos</span>
+      <span class="nav-text">Cursos</span>
       <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
     </button>
 
     <button mat-button [matMenuTriggerFor]="menuUsuarios" class="nav-button">
       <mat-icon>group</mat-icon>
-      <span>Usuarios</span>
+      <span class="nav-text">Usuarios</span>
       <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
     </button>
 
     <button mat-button [matMenuTriggerFor]="menuEstudiante" class="nav-button">
       <mat-icon>person</mat-icon>
-      <span>Estudiantes</span>
+      <span class="nav-text">Estudiantes</span>
       <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
     </button>
 
     <button mat-button [matMenuTriggerFor]="menuCompetencias" class="nav-button">
       <mat-icon>stars</mat-icon>
-      <span>Competencias</span>
+      <span class="nav-text">Competencias</span>
       <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
     </button>
 
     <button mat-button [matMenuTriggerFor]="menuNotas" class="nav-button">
       <mat-icon>assignment</mat-icon>
-      <span>Notas</span>
+      <span class="nav-text">Notas</span>
       <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
     </button>
 
     <button mat-button [matMenuTriggerFor]="menuAsignaciones" class="nav-button">
       <mat-icon>assignment_ind</mat-icon>
-      <span>Asignaciones</span>
+      <span class="nav-text">Asignaciones</span>
       <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
     </button>
 
     <button mat-button [matMenuTriggerFor]="menuAnalisis" class="nav-button">
       <mat-icon>analytics</mat-icon>
-      <span>Análisis</span>
+      <span class="nav-text">Análisis</span>
       <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
     </button>
   </div>
 
-  <!-- ⬇️ NUEVO: Menú de navegación USER (Docentes) -->
+  <!-- Menú de navegación USER (Docentes) -->
   <div class="toolbar-navigation" *ngIf="esDocente()">
     <button mat-button [matMenuTriggerFor]="menuNotasDocente" class="nav-button">
       <mat-icon>assignment</mat-icon>
-      <span>Mis Notas</span>
+      <span class="nav-text">Mis Notas</span>
       <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
     </button>
 
     <button mat-button [matMenuTriggerFor]="menuReportesDocente" class="nav-button">
       <mat-icon>assessment</mat-icon>
-      <span>Reportes</span>
+      <span class="nav-text">Reportes</span>
       <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
     </button>
 
     <button mat-button [matMenuTriggerFor]="menuAnalisisDocente" class="nav-button">
       <mat-icon>show_chart</mat-icon>
-      <span>Análisis</span>
+      <span class="nav-text">Análisis</span>
       <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
     </button>
   </div>
 
-  <!-- Usuario -->
+  <!-- Usuario - SIEMPRE VISIBLE -->
   <button mat-button [matMenuTriggerFor]="menuUsuario" class="user-button">
     <mat-icon>account_circle</mat-icon>
     <span class="user-name">{{username}}</span>
@@ -135,6 +135,7 @@
   </button>
 </mat-menu>
 
+<!-- Menú Notas -->
 <mat-menu #menuNotas="matMenu" class="custom-menu">
   <button mat-menu-item routerLink="/components/notas">
     <mat-icon>list</mat-icon>
@@ -158,19 +159,15 @@
   </button>
 </mat-menu>
 
-<!-- Menú Análisis -->
+<!-- Menú Análisis ADMIN -->
 <mat-menu #menuAnalisis="matMenu" class="custom-menu">
   <button mat-menu-item routerLink="/components/panel-riesgo">
     <mat-icon>warning</mat-icon>
     <span>Panel de Riesgo</span>
   </button>
-  <button mat-menu-item routerLink="/components/dashboard-grado">
-    <mat-icon>analytics</mat-icon>
-    <span>Dashboard por Grado</span>
-  </button>
 </mat-menu>
 
-<!-- ========== NUEVOS MENÚS PARA DOCENTES ========== -->
+<!-- ========== MENÚS PARA DOCENTES ========== -->
 
 <!-- Menú Notas Docente -->
 <mat-menu #menuNotasDocente="matMenu" class="custom-menu">
@@ -184,7 +181,7 @@
   </button>
   <button mat-menu-item routerLink="/components/docente/filtro-notas">
     <mat-icon>filter_list</mat-icon>
-    <span>Filtrar Notas (HU-15)</span>
+    <span>Filtrar Notas</span>
   </button>
 </mat-menu>
 
@@ -192,11 +189,11 @@
 <mat-menu #menuReportesDocente="matMenu" class="custom-menu">
   <button mat-menu-item routerLink="/components/docente/distribucion-calificaciones">
     <mat-icon>bar_chart</mat-icon>
-    <span>Distribución por Competencia (HU-16)</span>
+    <span>Distribución por Competencia</span>
   </button>
   <button mat-menu-item routerLink="/components/docente/competencias-riesgo">
     <mat-icon>analytics</mat-icon>
-    <span>Competencias con Mayor Riesgo (HU-17)</span>
+    <span>Competencias con Mayor Riesgo</span>
   </button>
 </mat-menu>
 
@@ -204,7 +201,7 @@
 <mat-menu #menuAnalisisDocente="matMenu" class="custom-menu">
   <button mat-menu-item routerLink="/components/docente/evolucion-competencia">
     <mat-icon>show_chart</mat-icon>
-    <span>Evolución por Estudiante (HU-13)</span>
+    <span>Evolución por Estudiante</span>
   </button>
   <button mat-menu-item routerLink="/components/panel-riesgo">
     <mat-icon>warning</mat-icon>
@@ -221,13 +218,12 @@
       <span class="user-menu-role">{{role}}</span>
     </div>
   </div>
-  <mat-divider></mat-divider>
+
   <button mat-menu-item routerLink="/components/welcome">
     <mat-icon>home</mat-icon>
     <span>Inicio</span>
   </button>
 
-  <mat-divider></mat-divider>
   <button mat-menu-item (click)="cerrar()" class="logout-button">
     <mat-icon>logout</mat-icon>
     <span>Cerrar Sesión</span>

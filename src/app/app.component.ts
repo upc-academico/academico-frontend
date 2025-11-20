@@ -58,7 +58,6 @@ export class AppComponent implements OnInit {
     return this.role === 'ADMIN';
   }
 
-  // ⬇️ NUEVO: Método para verificar si es docente
   esDocente(): boolean {
     return this.role === 'USER';
   }

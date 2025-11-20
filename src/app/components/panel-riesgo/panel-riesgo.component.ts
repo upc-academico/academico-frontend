@@ -1,7 +1,10 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NotaService } from 'src/app/services/nota.service';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { Router } from '@angular/router';
 
 interface EstudianteRiesgo {
   idEstudiante: number;
@@ -12,7 +15,6 @@ interface EstudianteRiesgo {
 }
 
 @Component({
-  encapsulation: ViewEncapsulation.None,
   selector: 'app-panel-riesgo',
   templateUrl: './panel-riesgo.component.html',
   styleUrls: ['./panel-riesgo.component.css']
@@ -21,6 +23,9 @@ export class PanelRiesgoComponent implements OnInit {
 
   filterForm: FormGroup;
   dataSource: MatTableDataSource<EstudianteRiesgo> = new MatTableDataSource();
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+  
   isLoading: boolean = false;
   totalEnRiesgo: number = 0;
 
@@ -61,7 +66,8 @@ export class PanelRiesgoComponent implements OnInit {
 
   constructor(
     private nS: NotaService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {
     this.filterForm = this.fb.group({
       periodo: ['Bimestre 1', Validators.required],
@@ -80,7 +86,6 @@ export class PanelRiesgoComponent implements OnInit {
       this.isLoading = true;
       const { periodo, anio, grado, seccion } = this.filterForm.value;
 
-      // ⬇️ NUEVO: Usar endpoint de riesgo académico (≥2 competencias con C)
       this.nS.findEstudiantesConRiesgoAcademico(periodo, anio).subscribe({
         next: (data) => {
           // Filtrar por grado y sección si están seleccionados
@@ -95,6 +100,9 @@ export class PanelRiesgoComponent implements OnInit {
           }
 
           this.dataSource = new MatTableDataSource(filteredData);
+          this.dataSource.paginator = this.paginator;
+          this.dataSource.sort = this.sort;
+          
           this.totalEnRiesgo = filteredData.length;
           this.isLoading = false;
         },
@@ -126,13 +134,20 @@ export class PanelRiesgoComponent implements OnInit {
     this.buscarEstudiantesEnRiesgo();
   }
 
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
+
   exportarReporte(): void {
     console.log('Exportar reporte');
-    // TODO: Implementar exportación
   }
 
   verDetalleEstudiante(idEstudiante: number): void {
-    // Redirigir a evolución del estudiante
-    window.open(`/components/evolucion-estudiante/${idEstudiante}`, '_blank');
+    this.router.navigate(['/components/evolucion-estudiante', idEstudiante]);
   }
 }

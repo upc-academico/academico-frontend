@@ -1,255 +1,152 @@
-/* Toolbar principal */
+/* Estilos del Toolbar */
 .modern-toolbar {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 0 16px;
-    height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Brand / Logo section */
 .toolbar-brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-}
-
-.menu-button {
-    margin-right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
 }
 
 .toolbar-logo {
-    height: 40px;
-    width: auto;
-    object-fit: contain;
+  height: 40px;
+  width: auto;
 }
 
 .toolbar-title {
-    font-size: 20px;
-    font-weight: 500;
-    color: white;
-    cursor: pointer;
-    transition: opacity 0.2s;
+  font-size: 20px;
+  font-weight: 500;
 }
 
-.toolbar-title:hover {
-    opacity: 0.8;
-}
-
-/* Spacer */
 .toolbar-spacer {
-    flex: 1 1 auto;
+  flex: 1 1 auto;
 }
 
-/* Navegación */
 .toolbar-navigation {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-right: 16px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
 }
 
 .nav-button {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0 12px;
-    height: 48px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-}
-
-.nav-button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  min-width: auto;
 }
 
 .nav-button mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+  margin-right: 4px;
 }
 
-.dropdown-icon {
-    font-size: 18px !important;
-    width: 18px !important;
-    height: 18px !important;
-    margin-left: -4px;
-}
-
-/* Botones de iconos */
-.toolbar-icon-button {
-    margin: 0 4px;
-}
-
-/* Botón de usuario */
 .user-button {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 12px;
-    height: 48px;
-    border-radius: 4px;
-    margin-left: 8px;
-    transition: background-color 0.2s;
-}
-
-.user-button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 16px;
+  flex-shrink: 0;
 }
 
 .user-name {
-    font-size: 14px;
-    font-weight: 500;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  font-weight: 500;
 }
 
-/* Menús personalizados */
+.dropdown-icon {
+  font-size: 20px;
+}
+
+/* Menús desplegables */
 .custom-menu {
-    margin-top: 8px;
+  margin-top: 8px;
 }
 
-.custom-menu .mat-mdc-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 48px;
-    padding: 0 16px;
-}
-
-.custom-menu .mat-mdc-menu-item mat-icon {
-    color: rgba(0, 0, 0, 0.54);
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-}
-
-.custom-menu .mat-mdc-menu-item:hover mat-icon {
-    color: #667eea;
-}
-
-/* Menú de usuario */
 .user-menu {
-    min-width: 260px;
+  min-width: 250px;
 }
 
 .user-menu-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  gap: 12px;
 }
 
 .user-avatar {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
 }
 
 .user-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  display: flex;
+  flex-direction: column;
 }
 
 .user-menu-name {
-    font-size: 16px;
-    font-weight: 500;
+  font-weight: 600;
+  font-size: 16px;
 }
 
 .user-menu-role {
-    font-size: 12px;
-    opacity: 0.9;
-    background-color: rgba(255, 255, 255, 0.2);
-    padding: 2px 8px;
-    border-radius: 12px;
-    display: inline-block;
-    width: fit-content;
+  font-size: 12px;
+  opacity: 0.9;
 }
 
 .logout-button {
-    color: #f44336 !important;
+  color: #f44336;
 }
 
-.logout-button mat-icon {
-    color: #f44336 !important;
-}
-
-/* Menú de notificaciones */
-.notifications-menu {
-    min-width: 320px;
-    max-width: 400px;
-}
-
-.notification-header {
-    padding: 16px;
-}
-
-.notification-header h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 500;
-    color: rgba(0, 0, 0, 0.87);
-}
-
-.notification-item {
-    padding: 12px 16px !important;
-    min-height: 72px !important;
-    align-items: flex-start !important;
-}
-
-.notification-content {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.notification-title {
-    font-weight: 500;
-    font-size: 14px;
-    color: rgba(0, 0, 0, 0.87);
-}
-
-.notification-text {
-    font-size: 12px;
-    color: rgba(0, 0, 0, 0.6);
-}
-
-/* Responsive */
+/* Responsive Design */
 @media (max-width: 960px) {
-    .toolbar-navigation {
-        display: none;
-    }
-
-    .toolbar-title {
-        font-size: 16px;
-    }
-
-    .user-name {
-        display: none;
-    }
-
-    .toolbar-logo {
-        height: 32px;
-    }
+  .nav-text {
+    display: none;
+  }
+  
+  .toolbar-title {
+    display: none;
+  }
+  
+  .nav-button {
+    min-width: 48px;
+    padding: 0 8px;
+  }
+  
+  .dropdown-icon {
+    display: none;
+  }
+  
+  .user-name {
+    display: none;
+  }
 }
 
 @media (max-width: 600px) {
-    .modern-toolbar {
-        padding: 0 8px;
-    }
+  .toolbar-logo {
+    height: 32px;
+  }
+  
+  .menu-button {
+    margin-right: 4px;
+  }
+  
+  .toolbar-navigation {
+    gap: 2px;
+  }
+  
+  .user-button {
+    margin-left: 8px;
+  }
+}
 
-    .toolbar-title {
-        display: none;
-    }
-
-    .toolbar-icon-button {
-        margin: 0 2px;
-    }
+/* Asegurar que el botón de usuario siempre esté visible */
+.user-button {
+  flex-shrink: 0 !important;
 }

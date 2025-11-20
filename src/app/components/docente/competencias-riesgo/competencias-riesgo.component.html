@@ -1,170 +1,196 @@
 <div class="container">
-    <mat-card class="filter-card">
-        <mat-card-header>
-            <mat-card-title>
-                <h2>
-                    <mat-icon>analytics</mat-icon>
-                    Análisis de Competencias con Mayor Riesgo
-                </h2>
-                <p class="subtitle">HU-17: Identifique patrones comunes de bajo rendimiento</p>
-            </mat-card-title>
-        </mat-card-header>
+  <mat-card>
+    <mat-card-header class="header">
+      <mat-card-title>
+        <mat-icon>analytics</mat-icon>
+        Competencias con Mayor Riesgo Académico
+      </mat-card-title>
+      <mat-card-subtitle>
+        HU-17: Identificar patrones comunes de bajo rendimiento en toda la sección o grado
+      </mat-card-subtitle>
+    </mat-card-header>
 
-        <mat-card-content>
-            <form [formGroup]="filterForm">
-                <div class="filter-row">
-                    <mat-form-field appearance="outline">
-                        <mat-label>Curso</mat-label>
-                        <mat-select formControlName="idCurso">
-                            <mat-option *ngFor="let asignacion of cursosDocente" [value]="asignacion.idCurso">
-                                {{ asignacion.nombreCurso }}
-                            </mat-option>
-                        </mat-select>
-                        <mat-icon matPrefix>book</mat-icon>
-                    </mat-form-field>
+    <mat-card-content>
+      <!-- Formulario de filtros -->
+      <form [formGroup]="filterForm" class="filter-form">
+        <div class="filter-grid">
+          <!-- Curso -->
+          <mat-form-field appearance="outline">
+            <mat-label>Curso</mat-label>
+            <mat-select formControlName="idCurso">
+              <mat-option *ngFor="let asignacion of cursosDocente" 
+                          [value]="asignacion.idCurso">
+                {{asignacion.nombreCurso}}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>book</mat-icon>
+            <mat-error>Seleccione un curso</mat-error>
+          </mat-form-field>
 
-                    <mat-form-field appearance="outline">
-                        <mat-label>Sección</mat-label>
-                        <mat-select formControlName="seccion" [disabled]="!filterForm.get('idCurso')?.value">
-                            <mat-option *ngFor="let seccion of seccionesDocente" [value]="seccion">
-                                Sección {{ seccion }}
-                            </mat-option>
-                        </mat-select>
-                        <mat-icon matPrefix>class</mat-icon>
-                    </mat-form-field>
+          <!-- Sección -->
+          <mat-form-field appearance="outline">
+            <mat-label>Sección</mat-label>
+            <mat-select formControlName="seccion"
+                        [disabled]="!filterForm.get('idCurso')?.value">
+              <mat-option *ngFor="let seccion of seccionesDocente" 
+                          [value]="seccion">
+                Sección {{seccion}}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>group</mat-icon>
+            <mat-error>Seleccione una sección</mat-error>
+          </mat-form-field>
 
-                    <mat-form-field appearance="outline">
-                        <mat-label>Periodo</mat-label>
-                        <mat-select formControlName="periodo">
-                            <mat-option *ngFor="let periodo of periodos" [value]="periodo.value">
-                                {{ periodo.viewValue }}
-                            </mat-option>
-                        </mat-select>
-                        <mat-icon matPrefix>calendar_today</mat-icon>
-                    </mat-form-field>
+          <!-- Periodo -->
+          <mat-form-field appearance="outline">
+            <mat-label>Periodo</mat-label>
+            <mat-select formControlName="periodo">
+              <mat-option *ngFor="let periodo of periodos" 
+                          [value]="periodo.value">
+                {{periodo.viewValue}}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>calendar_today</mat-icon>
+          </mat-form-field>
 
-                    <mat-form-field appearance="outline">
-                        <mat-label>Año Académico</mat-label>
-                        <input matInput type="number" formControlName="anio">
-                        <mat-icon matPrefix>event</mat-icon>
-                    </mat-form-field>
+          <!-- Año -->
+          <mat-form-field appearance="outline">
+            <mat-label>Año Académico</mat-label>
+            <input matInput type="number" formControlName="anio" min="2020">
+            <mat-icon matPrefix>date_range</mat-icon>
+          </mat-form-field>
+        </div>
 
-                    <button mat-raised-button color="primary" (click)="analizarCompetencias()"
-                        [disabled]="!filterForm.valid || isLoading" class="search-button">
-                        <mat-icon>search</mat-icon>
-                        Analizar
-                    </button>
-                </div>
-            </form>
-        </mat-card-content>
-    </mat-card>
+        <!-- Botón de búsqueda -->
+        <div class="form-actions">
+          <button mat-raised-button color="primary" 
+                  (click)="analizarCompetencias()"
+                  [disabled]="!filterForm.valid || isLoading">
+            <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isLoading">analytics</mat-icon>
+            Analizar Competencias
+          </button>
+        </div>
+      </form>
 
-    <!-- Gráfico -->
-    <mat-card class="chart-card" *ngIf="dataSource.data.length > 0 && !isLoading">
-        <mat-card-content>
-            <div class="chart-wrapper">
-                <canvas id="chartCompetencias"></canvas>
+ 
+
+      <!-- Resultados -->
+      <div class="results-container" *ngIf="dataSource.data.length > 0">
+        <!-- Buscador -->
+        <div class="search-bar">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Buscar competencia</mat-label>
+            <input matInput (keyup)="applyFilter($event)" 
+                   placeholder="Buscar...">
+            <mat-icon matPrefix>search</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Gráfico -->
+        <div class="chart-container">
+          <canvas id="chartCompetencias"></canvas>
+        </div>
+
+        <!-- Tabla de resultados -->
+        <div class="table-container">
+          <table mat-table [dataSource]="dataSource" 
+                 matSort class="mat-elevation-z2">
+
+            <!-- Columna Competencia -->
+            <ng-container matColumnDef="competencia">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Competencia</th>
+              <td mat-cell *matCellDef="let comp">{{comp.nombreCompetencia}}</td>
+            </ng-container>
+
+            <!-- Columna AD -->
+            <ng-container matColumnDef="ad">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>AD</th>
+              <td mat-cell *matCellDef="let comp">
+                <span class="badge badge-ad">{{comp.AD || 0}}</span>
+              </td>
+            </ng-container>
+
+            <!-- Columna A -->
+            <ng-container matColumnDef="a">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>A</th>
+              <td mat-cell *matCellDef="let comp">
+                <span class="badge badge-a">{{comp.A || 0}}</span>
+              </td>
+            </ng-container>
+
+            <!-- Columna B -->
+            <ng-container matColumnDef="b">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>B</th>
+              <td mat-cell *matCellDef="let comp">
+                <span class="badge badge-b">{{comp.B || 0}}</span>
+              </td>
+            </ng-container>
+
+            <!-- Columna C -->
+            <ng-container matColumnDef="c">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>C</th>
+              <td mat-cell *matCellDef="let comp">
+                <span class="badge badge-c">{{comp.C || 0}}</span>
+              </td>
+            </ng-container>
+
+            <!-- Columna Total -->
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Total</th>
+              <td mat-cell *matCellDef="let comp">
+                <strong>{{comp.total}}</strong>
+              </td>
+            </ng-container>
+
+            <!-- Columna Riesgo -->
+            <ng-container matColumnDef="riesgo">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Nivel de Riesgo</th>
+              <td mat-cell *matCellDef="let comp">
+                <span class="riesgo-badge" [ngClass]="'riesgo-' + getNivelRiesgo(comp.porcentajeRiesgo)">
+                  {{comp.porcentajeRiesgo}}% en C
+                </span>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+
+          <mat-paginator [pageSizeOptions]="[5, 10, 20]" 
+                         showFirstLastButtons>
+          </mat-paginator>
+        </div>
+
+        <!-- Leyenda -->
+        <div class="legend-container">
+          <h4>Niveles de Riesgo:</h4>
+          <div class="legend-grid">
+            <div class="legend-item">
+              <span class="legend-indicator riesgo-critico"></span>
+              <span>Crítico (≥50% en C)</span>
             </div>
-        </mat-card-content>
-    </mat-card>
-
-    <!-- Tabla de resultados -->
-    <mat-card class="table-card" *ngIf="dataSource.data.length > 0 || isLoading">
-        <mat-card-header class="table-header">
-            <mat-card-title>
-                <h3>
-                    <mat-icon>list</mat-icon>
-                    Detalle por Competencia
-                </h3>
-            </mat-card-title>
-        </mat-card-header>
-
-        <mat-card-content>
-            <div class="loading-container" *ngIf="isLoading">
-                <mat-spinner></mat-spinner>
-                <p>Analizando competencias...</p>
+            <div class="legend-item">
+              <span class="legend-indicator riesgo-alto"></span>
+              <span>Alto (30-49% en C)</span>
             </div>
-
-            <div class="table-container" *ngIf="!isLoading">
-                <table mat-table [dataSource]="dataSource" class="mat-elevation-z2">
-
-                    <!-- Columna Competencia -->
-                    <ng-container matColumnDef="competencia">
-                        <th mat-header-cell *matHeaderCellDef>Competencia</th>
-                        <td mat-cell *matCellDef="let comp">
-                            <div class="competencia-cell">
-                                <mat-icon>stars</mat-icon>
-                                <span>{{ comp.nombreCompetencia }}</span>
-                            </div>
-                        </td>
-                    </ng-container>
-
-                    <!-- Columna AD -->
-                    <ng-container matColumnDef="ad">
-                        <th mat-header-cell *matHeaderCellDef class="center">AD</th>
-                        <td mat-cell *matCellDef="let comp" class="center">
-                            <mat-chip class="chip-ad">{{ comp.AD || 0 }}</mat-chip>
-                        </td>
-                    </ng-container>
-
-                    <!-- Columna A -->
-                    <ng-container matColumnDef="a">
-                        <th mat-header-cell *matHeaderCellDef class="center">A</th>
-                        <td mat-cell *matCellDef="let comp" class="center">
-                            <mat-chip class="chip-a">{{ comp.A || 0 }}</mat-chip>
-                        </td>
-                    </ng-container>
-
-                    <!-- Columna B -->
-                    <ng-container matColumnDef="b">
-                        <th mat-header-cell *matHeaderCellDef class="center">B</th>
-                        <td mat-cell *matCellDef="let comp" class="center">
-                            <mat-chip class="chip-b">{{ comp.B || 0 }}</mat-chip>
-                        </td>
-                    </ng-container>
-
-                    <!-- Columna C -->
-                    <ng-container matColumnDef="c">
-                        <th mat-header-cell *matHeaderCellDef class="center">C</th>
-                        <td mat-cell *matCellDef="let comp" class="center">
-                            <mat-chip class="chip-c">{{ comp.C || 0 }}</mat-chip>
-                        </td>
-                    </ng-container>
-
-                    <!-- Columna Total -->
-                    <ng-container matColumnDef="total">
-                        <th mat-header-cell *matHeaderCellDef class="center">Total</th>
-                        <td mat-cell *matCellDef="let comp" class="center">
-                            <strong>{{ comp.total }}</strong>
-                        </td>
-                    </ng-container>
-
-                    <!-- Columna Nivel de Riesgo -->
-                    <ng-container matColumnDef="riesgo">
-                        <th mat-header-cell *matHeaderCellDef>Nivel de Riesgo</th>
-                        <td mat-cell *matCellDef="let comp">
-                            <div class="riesgo-cell">
-                                <mat-chip [class]="'riesgo-chip ' + getNivelRiesgo(comp.porcentajeRiesgo)">
-                                    {{ comp.porcentajeRiesgo }}% en C
-                                </mat-chip>
-                            </div>
-                        </td>
-                    </ng-container>
-
-                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-                    <!-- Sin datos -->
-                    <tr class="mat-row" *matNoDataRow>
-                        <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length">
-                            <div class="no-data-container">
-                                <mat-icon>info</mat-icon>
-                                <p>No hay datos disponibles</p>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
+            <div class="legend-item">
+              <span class="legend-indicator riesgo-medio"></span>
+              <span>Medio (15-29% en C)</span>
             </div>
-        </mat-card-content>
-    </mat-card>
+            <div class="legend-item">
+              <span class="legend-indicator riesgo-bajo"></span>
+              <span>Bajo (<15% en C)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensaje inicial -->
+      <div class="initial-message" *ngIf="dataSource.data.length === 0 && !isLoading">
+        <mat-icon>analytics</mat-icon>
+        <p>Seleccione los filtros y haga clic en "Analizar Competencias" para identificar áreas de riesgo</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </div>

@@ -4,10 +4,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Nota } from 'src/app/models/Nota';
 import { Estudiante } from 'src/app/models/Estudiante';
 import { Competencia } from 'src/app/models/Competencia';
+import { Curso } from 'src/app/models/Curso';
 import { User } from 'src/app/models/User';
 import { NotaService } from 'src/app/services/nota.service';
 import { EstudianteService } from 'src/app/services/estudiante.service';
 import { CompetenciaService } from 'src/app/services/competencia.service';
+import { CursoService } from 'src/app/services/curso.service';
+import { AsignacionDocenteService } from 'src/app/services/asignacion-docente.service';
 import { UsersService } from 'src/app/services/users.service';
 import { LoginService } from 'src/app/services/login.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -30,8 +33,16 @@ export class CreaeditaNotaComponent implements OnInit {
   listaEstudiantes: Estudiante[] = [];
   listaCompetencias: Competencia[] = [];
   listaDocentes: User[] = [];
+  listaCursos: Curso[] = [];
+  
+  // Listas filtradas
+  estudiantesFiltrados: Estudiante[] = [];
+  competenciasFiltradas: Competencia[] = [];
+  
+  // Listas de grados y secciones del docente
+  gradosDocente: string[] = [];
+  seccionesDocente: string[] = [];
 
-  // ⬇️ ACTUALIZADO: Calificaciones con letras
   calificaciones = [
     { value: 'AD', viewValue: 'AD - Logro Destacado', color: '#4caf50' },
     { value: 'A', viewValue: 'A - Logro Esperado', color: '#2196f3' },
@@ -56,6 +67,8 @@ export class CreaeditaNotaComponent implements OnInit {
     private nS: NotaService,
     private eS: EstudianteService,
     private cS: CompetenciaService,
+    private cursoS: CursoService,
+    private adS: AsignacionDocenteService,
     private uS: UsersService,
     private loginService: LoginService,
     private router: Router,
@@ -71,27 +84,25 @@ export class CreaeditaNotaComponent implements OnInit {
       this.init();
     });
 
-    // Obtener rol y usuario actual
     this.currentUserRole = this.loginService.showRole();
     this.currentUserId = this.getUserIdFromToken();
 
     this.form = this.formBuilder.group({
       idNota: [''],
+      grado: ['', Validators.required],
+      seccion: ['', Validators.required],
       idEstudiante: ['', Validators.required],
-      idCompetencia: ['', Validators.required],
-      idDocente: ['', Validators.required],
-      calificacion: ['', Validators.required], // ⬅️ Ahora es string
       periodo: ['', Validators.required],
       anio: [new Date().getFullYear(), [Validators.required, Validators.min(2020)]],
+      idDocente: [{ value: '', disabled: true }, Validators.required],
+      idCurso: ['', Validators.required],
+      idCompetencia: ['', Validators.required],
+      calificacion: ['', Validators.required],
       observacion: ['', Validators.maxLength(500)]
     });
 
-    // Si es docente (USER), pre-seleccionar su ID
-    if (this.currentUserRole === 'USER' && !this.edicion) {
-      this.form.patchValue({ idDocente: this.currentUserId });
-    }
-
     this.loadData();
+    this.setupFormListeners();
   }
 
   getUserIdFromToken(): number {
@@ -108,18 +119,85 @@ export class CreaeditaNotaComponent implements OnInit {
   }
 
   loadData(): void {
+    // Cargar todos los estudiantes
     this.eS.list().subscribe((data) => {
       this.listaEstudiantes = data;
     });
 
+    // Cargar todas las competencias
     this.cS.list().subscribe((data) => {
       this.listaCompetencias = data;
     });
 
+    // Cargar docentes
     this.uS.list().subscribe((data) => {
-      // Solo mostrar usuarios con rol ADMIN (docentes)
       this.listaDocentes = data.filter(u => u.role === 'ADMIN' || u.role === 'USER');
     });
+
+    // Cargar asignaciones del docente y construir listas
+    this.adS.findByDocente(this.currentUserId).subscribe((asignaciones) => {
+      // Obtener grados únicos
+      this.gradosDocente = [...new Set(asignaciones.map(a => a.grado))];
+      
+      // Cargar cursos del docente
+      const cursoIds = [...new Set(asignaciones.map(a => a.idCurso))];
+      this.cursoS.list().subscribe((cursos) => {
+        this.listaCursos = cursos.filter(c => cursoIds.includes(c.idCurso));
+      });
+
+      // Pre-seleccionar docente si no es edición
+      if (!this.edicion) {
+        this.form.patchValue({ idDocente: this.currentUserId });
+      }
+    });
+  }
+
+  setupFormListeners(): void {
+    // Listener para grado
+    this.form.get('grado')?.valueChanges.subscribe(grado => {
+      if (grado) {
+        this.loadSeccionesPorGrado(grado);
+      }
+      this.form.patchValue({ seccion: '', idEstudiante: '' });
+    });
+
+    // Listener para sección
+    this.form.get('seccion')?.valueChanges.subscribe(seccion => {
+      const grado = this.form.get('grado')?.value;
+      if (grado && seccion) {
+        this.loadEstudiantesPorGradoSeccion(grado, seccion);
+      }
+    });
+
+    // Listener para curso
+    this.form.get('idCurso')?.valueChanges.subscribe(idCurso => {
+      if (idCurso) {
+        this.loadCompetenciasPorCurso(idCurso);
+      }
+      this.form.patchValue({ idCompetencia: '' });
+    });
+  }
+
+  loadSeccionesPorGrado(grado: string): void {
+    this.adS.findByDocente(this.currentUserId).subscribe((asignaciones) => {
+      this.seccionesDocente = [...new Set(
+        asignaciones
+          .filter(a => a.grado === grado)
+          .map(a => a.seccion)
+      )];
+    });
+  }
+
+  loadEstudiantesPorGradoSeccion(grado: string, seccion: string): void {
+    this.estudiantesFiltrados = this.listaEstudiantes.filter(
+      e => e.grado === grado && e.seccion === seccion
+    );
+  }
+
+  loadCompetenciasPorCurso(idCurso: number): void {
+    this.competenciasFiltradas = this.listaCompetencias.filter(
+      c => c.curso.idCurso === idCurso
+    );
   }
 
   aceptar(): void {
@@ -127,14 +205,17 @@ export class CreaeditaNotaComponent implements OnInit {
       this.isLoading = true;
       this.mensaje = '';
 
-      this.nota.idNota = this.form.value.idNota;
-      this.nota.idEstudiante = this.form.value.idEstudiante;
-      this.nota.idCompetencia = this.form.value.idCompetencia;
-      this.nota.idDocente = this.form.value.idDocente;
-      this.nota.calificacion = this.form.value.calificacion; // ⬅️ String
-      this.nota.periodo = this.form.value.periodo;
-      this.nota.anio = this.form.value.anio;
-      this.nota.observacion = this.form.value.observacion;
+      // Obtener el valor del idDocente (aunque esté deshabilitado)
+      const formValue = this.form.getRawValue();
+
+      this.nota.idNota = formValue.idNota;
+      this.nota.idEstudiante = formValue.idEstudiante;
+      this.nota.idCompetencia = formValue.idCompetencia;
+      this.nota.idDocente = formValue.idDocente;
+      this.nota.calificacion = formValue.calificacion;
+      this.nota.periodo = formValue.periodo;
+      this.nota.anio = formValue.anio;
+      this.nota.observacion = formValue.observacion;
       this.nota.enabled = true;
 
       const operation = this.edicion
@@ -178,12 +259,15 @@ export class CreaeditaNotaComponent implements OnInit {
       this.nS.listId(this.id).subscribe((data) => {
         this.form = new FormGroup({
           idNota: new FormControl(data.idNota),
+          grado: new FormControl(''),
+          seccion: new FormControl(''),
           idEstudiante: new FormControl(data.idEstudiante),
-          idCompetencia: new FormControl(data.idCompetencia),
-          idDocente: new FormControl(data.idDocente),
-          calificacion: new FormControl(data.calificacion),
           periodo: new FormControl(data.periodo),
           anio: new FormControl(data.anio),
+          idDocente: new FormControl({ value: data.idDocente, disabled: true }),
+          idCurso: new FormControl(''),
+          idCompetencia: new FormControl(data.idCompetencia),
+          calificacion: new FormControl(data.calificacion),
           observacion: new FormControl(data.observacion)
         });
       });
@@ -201,7 +285,6 @@ export class CreaeditaNotaComponent implements OnInit {
     this.router.navigate(['components/notas']);
   }
 
-  // Método auxiliar para obtener color según calificación
   getCalificacionColor(calificacion: string): string {
     const cal = this.calificaciones.find(c => c.value === calificacion);
     return cal ? cal.color : '#757575';

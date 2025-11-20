@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NotaService } from 'src/app/services/nota.service';
 import { EstudianteService } from 'src/app/services/estudiante.service';
@@ -18,6 +18,8 @@ Chart.register(...registerables);
   styleUrls: ['./evolucion-competencia.component.css']
 })
 export class EvolucionCompetenciaComponent implements OnInit {
+
+  @ViewChild('chartCanvas') chartCanvas!: ElementRef;
 
   filterForm: FormGroup;
   isLoading: boolean = false;
@@ -61,6 +63,10 @@ export class EvolucionCompetenciaComponent implements OnInit {
         this.loadCompetenciasPorCurso(idCurso);
         this.loadEstudiantesPorCurso(idCurso);
       }
+      this.filterForm.patchValue({ 
+        idCompetencia: '', 
+        idEstudiante: '' 
+      });
     });
   }
 
@@ -80,7 +86,14 @@ export class EvolucionCompetenciaComponent implements OnInit {
   loadAsignacionesDocente(): void {
     this.adS.findByDocente(this.currentUserId).subscribe({
       next: (data) => {
-        this.cursosDocente = data;
+        // Eliminar duplicados de cursos
+        const cursosUnicos = new Map<number, AsignacionDocente>();
+        data.forEach(asignacion => {
+          if (!cursosUnicos.has(asignacion.idCurso)) {
+            cursosUnicos.set(asignacion.idCurso, asignacion);
+          }
+        });
+        this.cursosDocente = Array.from(cursosUnicos.values());
       },
       error: (error) => console.error('Error:', error)
     });
@@ -97,18 +110,23 @@ export class EvolucionCompetenciaComponent implements OnInit {
 
   loadEstudiantesPorCurso(idCurso: number): void {
     // Obtener las secciones que dicta el docente para este curso
-    const seccionesDocente = this.cursosDocente
-      .filter(a => a.idCurso === idCurso)
-      .map(a => ({ grado: a.grado, seccion: a.seccion }));
+    this.adS.findByDocente(this.currentUserId).subscribe({
+      next: (asignaciones) => {
+        const seccionesDocente = asignaciones
+          .filter(a => a.idCurso === idCurso)
+          .map(a => ({ grado: a.grado, seccion: a.seccion }));
 
-    this.eS.list().subscribe({
-      next: (data) => {
-        // Filtrar estudiantes que pertenecen a las secciones del docente
-        this.estudiantesCurso = data.filter(estudiante =>
-          seccionesDocente.some(s =>
-            s.grado === estudiante.grado && s.seccion === estudiante.seccion
-          )
-        );
+        this.eS.list().subscribe({
+          next: (data) => {
+            // Filtrar estudiantes que pertenecen a las secciones del docente
+            this.estudiantesCurso = data.filter(estudiante =>
+              seccionesDocente.some(s =>
+                s.grado === estudiante.grado && s.seccion === estudiante.seccion
+              )
+            );
+          },
+          error: (error) => console.error('Error:', error)
+        });
       },
       error: (error) => console.error('Error:', error)
     });
@@ -124,7 +142,7 @@ export class EvolucionCompetenciaComponent implements OnInit {
       const competencia = this.competenciasCurso.find(c => c.idCompetencia === idCompetencia);
 
       this.nombreEstudiante = estudiante ? `${estudiante.nombres} ${estudiante.apellidos}` : '';
-      // this.nombreCompetencia = competencia ? competencia.nombreCompetencia : '';
+      this.nombreCompetencia = competencia ? competencia.nombreCompetencia.toString() : '';
 
       this.nS.getEvolucionPorCompetencia(idEstudiante, idCompetencia).subscribe({
         next: (data) => {
@@ -184,90 +202,95 @@ export class EvolucionCompetenciaComponent implements OnInit {
     return 'C';
   }
 
-  crearGraficoEvolucion(datos: any[]): void {
-    const canvas = document.getElementById('chartEvolucion') as HTMLCanvasElement;
-    const ctx = canvas?.getContext('2d');
+ crearGraficoEvolucion(datos: any[]): void {
+  const canvas = document.getElementById('chartEvolucion') as HTMLCanvasElement;
+  const ctx = canvas?.getContext('2d');
 
-    if (this.chart) {
-      this.chart.destroy();
-    }
+  if (this.chart) {
+    this.chart.destroy();
+  }
 
-    const labels = datos.map(d => `${d.periodo} ${d.anio}`);
-    const calificaciones = datos.map(d => this.calificacionANumero(d.calificacion));
-    const colores = datos.map(d => this.getColorPorCalificacion(d.calificacion));
+  const labels = datos.map(d => `${d.periodo} ${d.anio}`);
+  const calificaciones = datos.map(d => this.calificacionANumero(d.calificacion));
+  const colores = datos.map(d => this.getColorPorCalificacion(d.calificacion));
 
-    if (ctx) {
-      this.chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Nivel de Logro',
-            data: calificaciones,
-            borderColor: '#667eea',
-            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-            borderWidth: 3,
-            fill: true,
-            tension: 0.4,
-            pointRadius: 8,
-            pointBackgroundColor: colores,
-            pointBorderColor: '#fff',
-            pointBorderWidth: 3,
-            pointHoverRadius: 10
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            },
-            title: {
-              display: true,
-              text: `Evolución de ${this.nombreEstudiante} en ${this.nombreCompetencia}`,
-              font: {
-                size: 18,
-                weight: 'bold'
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: (context) => {
-                  const valor = context.parsed.y;
-                  // const letra = this.numeroACalificacion(valor);
-                  // return `Nivel: ${letra} (${this.getNombreNivel(letra)})`;
-                }
-              }
+  if (ctx) {
+    this.chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Nivel de Logro',
+          data: calificaciones,
+          borderColor: '#667eea',
+          backgroundColor: 'rgba(102, 126, 234, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 8,
+          pointBackgroundColor: colores,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 3,
+          pointHoverRadius: 10
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          title: {
+            display: true,
+            text: `Evolución de ${this.nombreEstudiante}`,
+            font: {
+              size: 18,
+              weight: 'bold'
             }
           },
-          scales: {
-            y: {
-              min: 0,
-              max: 4,
-              ticks: {
-                stepSize: 1,
-                callback: (value) => {
-                  const niveles = ['', 'C', 'B', 'A', 'AD'];
-                  return niveles[value as number];
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const valor = context.parsed.y;
+                // ⬇️ CORRECCIÓN: Verificar si el valor no es null
+                if (valor === null || valor === undefined) {
+                  return 'Sin datos';
                 }
-              },
-              title: {
-                display: true,
-                text: 'Nivel de Logro'
-              }
-            },
-            x: {
-              title: {
-                display: true,
-                text: 'Periodo Académico'
+                const letra = this.numeroACalificacion(valor);
+                return `Nivel: ${letra} (${this.getNombreNivel(letra)})`;
               }
             }
           }
+        },
+        scales: {
+          y: {
+            min: 0,
+            max: 4,
+            ticks: {
+              stepSize: 1,
+              callback: (value) => {
+                const niveles = ['', 'C', 'B', 'A', 'AD'];
+                const index = typeof value === 'number' ? value : 0;
+                return niveles[index];
+              }
+            },
+            title: {
+              display: true,
+              text: 'Nivel de Logro'
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Periodo Académico'
+            }
+          }
         }
-      });
-    }
+      }
+    });
   }
+}
 
   getColorPorCalificacion(calificacion: string): string {
     const colores: { [key: string]: string } = {

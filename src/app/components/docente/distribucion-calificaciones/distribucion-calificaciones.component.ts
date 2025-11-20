@@ -25,7 +25,8 @@ export class DistribucionCalificacionesComponent implements OnInit {
   competenciasCurso: Competencia[] = [];
   seccionesDocente: string[] = [];
 
-  chart: any;
+  chartBarras: any;
+  chartTorta: any;
   distribucionData: any = null;
 
   periodos = [
@@ -60,6 +61,10 @@ export class DistribucionCalificacionesComponent implements OnInit {
         this.loadCompetenciasPorCurso(idCurso);
         this.loadSeccionesPorCurso(idCurso);
       }
+      this.filterForm.patchValue({ 
+        idCompetencia: '', 
+        seccion: '' 
+      });
     });
   }
 
@@ -79,7 +84,14 @@ export class DistribucionCalificacionesComponent implements OnInit {
   loadAsignacionesDocente(): void {
     this.adS.findByDocente(this.currentUserId).subscribe({
       next: (data) => {
-        this.cursosDocente = data;
+        // Eliminar duplicados de cursos
+        const cursosUnicos = new Map<number, AsignacionDocente>();
+        data.forEach(asignacion => {
+          if (!cursosUnicos.has(asignacion.idCurso)) {
+            cursosUnicos.set(asignacion.idCurso, asignacion);
+          }
+        });
+        this.cursosDocente = Array.from(cursosUnicos.values());
       },
       error: (error) => console.error('Error:', error)
     });
@@ -95,10 +107,15 @@ export class DistribucionCalificacionesComponent implements OnInit {
   }
 
   loadSeccionesPorCurso(idCurso: number): void {
-    const secciones = this.cursosDocente
-      .filter(a => a.idCurso === idCurso)
-      .map(a => a.seccion);
-    this.seccionesDocente = [...new Set(secciones)];
+    this.adS.findByDocente(this.currentUserId).subscribe({
+      next: (data) => {
+        const secciones = data
+          .filter(a => a.idCurso === idCurso)
+          .map(a => a.seccion);
+        this.seccionesDocente = [...new Set(secciones)];
+      },
+      error: (error) => console.error('Error:', error)
+    });
   }
 
   generarGrafico(): void {
@@ -135,12 +152,12 @@ export class DistribucionCalificacionesComponent implements OnInit {
     const canvas = document.getElementById('chartBarras') as HTMLCanvasElement;
     const ctx = canvas?.getContext('2d');
 
-    if (this.chart) {
-      this.chart.destroy();
+    if (this.chartBarras) {
+      this.chartBarras.destroy();
     }
 
     if (ctx) {
-      this.chart = new Chart(ctx, {
+      this.chartBarras = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: ['AD - Logro Destacado', 'A - Logro Esperado', 'B - En Proceso', 'C - En Inicio'],
@@ -176,7 +193,10 @@ export class DistribucionCalificacionesComponent implements OnInit {
           scales: {
             y: {
               beginAtZero: true,
-              ticks: { stepSize: 1 },
+              ticks: { 
+                stepSize: 1,
+                precision: 0
+              },
               title: {
                 display: true,
                 text: 'Cantidad de Estudiantes'
@@ -192,8 +212,14 @@ export class DistribucionCalificacionesComponent implements OnInit {
     const canvas = document.getElementById('chartTorta') as HTMLCanvasElement;
     const ctx = canvas?.getContext('2d');
 
-    if (ctx) {
-      new Chart(ctx, {
+    if (this.chartTorta) {
+      this.chartTorta.destroy();
+    }
+
+    const total = (data.AD || 0) + (data.A || 0) + (data.B || 0) + (data.C || 0);
+
+    if (ctx && total > 0) {
+      this.chartTorta = new Chart(ctx, {
         type: 'doughnut',
         data: {
           labels: ['AD', 'A', 'B', 'C'],
@@ -205,6 +231,7 @@ export class DistribucionCalificacionesComponent implements OnInit {
               'rgba(255, 152, 0, 0.8)',
               'rgba(244, 67, 54, 0.8)'
             ],
+            borderColor: '#fff',
             borderWidth: 2
           }]
         },
@@ -212,11 +239,29 @@ export class DistribucionCalificacionesComponent implements OnInit {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { position: 'bottom' },
+            legend: { 
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                font: {
+                  size: 14
+                }
+              }
+            },
             title: {
               display: true,
               text: 'Proporción de Calificaciones',
               font: { size: 18, weight: 'bold' }
+            },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const label = context.label || '';
+                  const value = context.parsed;
+                  const percentage = ((value / total) * 100).toFixed(1);
+                  return `${label}: ${value} estudiantes (${percentage}%)`;
+                }
+              }
             }
           }
         }
@@ -224,9 +269,26 @@ export class DistribucionCalificacionesComponent implements OnInit {
     }
   }
 
+  getTotalEstudiantes(): number {
+    if (!this.distribucionData) return 0;
+    return (this.distribucionData.AD || 0) + 
+           (this.distribucionData.A || 0) + 
+           (this.distribucionData.B || 0) + 
+           (this.distribucionData.C || 0);
+  }
+
+  getPorcentaje(valor: number): string {
+    const total = this.getTotalEstudiantes();
+    if (total === 0) return '0';
+    return ((valor / total) * 100).toFixed(1);
+  }
+
   ngOnDestroy(): void {
-    if (this.chart) {
-      this.chart.destroy();
+    if (this.chartBarras) {
+      this.chartBarras.destroy();
+    }
+    if (this.chartTorta) {
+      this.chartTorta.destroy();
     }
   }
 }

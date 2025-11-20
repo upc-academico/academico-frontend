@@ -1,147 +1,187 @@
 <div class="container">
-    <mat-card class="filter-card">
-        <mat-card-header>
-            <mat-card-title>
-                <h2>
-                    <mat-icon>filter_list</mat-icon>
-                    Filtrar Notas por Curso y Competencia
-                </h2>
-                <p class="subtitle">HU-15: Personalice la información según su área y competencia</p>
-            </mat-card-title>
-        </mat-card-header>
+  <mat-card>
+    <mat-card-header class="header">
+      <mat-card-title>
+        <mat-icon>filter_list</mat-icon>
+        Filtrar Notas por Sección y Competencia
+      </mat-card-title>
+      <mat-card-subtitle>
+        HU-15: Filtrar información por sección, área y competencia
+      </mat-card-subtitle>
+    </mat-card-header>
 
-        <mat-card-content>
-            <form [formGroup]="filterForm">
-                <div class="filter-row">
-                    <!-- Curso -->
-                    <mat-form-field appearance="outline">
-                        <mat-label>Curso</mat-label>
-                        <mat-select formControlName="idCurso">
-                            <mat-option *ngFor="let asignacion of cursosDocente" [value]="asignacion.idCurso">
-                                {{ asignacion.nombreCurso }}
-                            </mat-option>
-                        </mat-select>
-                        <mat-icon matPrefix>book</mat-icon>
-                    </mat-form-field>
+    <mat-card-content>
+      <!-- Formulario de filtros -->
+      <form [formGroup]="filterForm" class="filter-form">
+        <div class="filter-grid">
+          <!-- Curso -->
+          <mat-form-field appearance="outline">
+            <mat-label>Curso</mat-label>
+            <mat-select formControlName="idCurso">
+              <mat-option *ngFor="let asignacion of cursosDocente" 
+                          [value]="asignacion.idCurso">
+                {{asignacion.nombreCurso}}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>book</mat-icon>
+            <mat-error>Seleccione un curso</mat-error>
+          </mat-form-field>
 
-                    <!-- Competencia -->
-                    <mat-form-field appearance="outline">
-                        <mat-label>Competencia</mat-label>
-                        <mat-select formControlName="idCompetencia" [disabled]="!filterForm.get('idCurso')?.value">
-                            <mat-option *ngFor="let competencia of competenciasCurso"
-                                [value]="competencia.idCompetencia">
-                                {{ competencia.nombreCompetencia }}
-                            </mat-option>
-                        </mat-select>
-                        <mat-icon matPrefix>stars</mat-icon>
-                    </mat-form-field>
+          <!-- Competencia -->
+          <mat-form-field appearance="outline">
+            <mat-label>Competencia</mat-label>
+            <mat-select formControlName="idCompetencia" 
+                        [disabled]="!filterForm.get('idCurso')?.value">
+              <mat-option *ngFor="let competencia of competenciasCurso" 
+                          [value]="competencia.idCompetencia">
+                {{competencia.nombreCompetencia}}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>stars</mat-icon>
+            <mat-error>Seleccione una competencia</mat-error>
+          </mat-form-field>
 
-                    <!-- Sección -->
-                    <mat-form-field appearance="outline">
-                        <mat-label>Sección</mat-label>
-                        <mat-select formControlName="seccion" [disabled]="!filterForm.get('idCurso')?.value">
-                            <mat-option *ngFor="let seccion of seccionesDocente" [value]="seccion">
-                                Sección {{ seccion }}
-                            </mat-option>
-                        </mat-select>
-                        <mat-icon matPrefix>class</mat-icon>
-                    </mat-form-field>
+          <!-- Sección -->
+          <mat-form-field appearance="outline">
+            <mat-label>Sección</mat-label>
+            <mat-select formControlName="seccion"
+                        [disabled]="!filterForm.get('idCurso')?.value">
+              <mat-option *ngFor="let seccion of seccionesDocente" 
+                          [value]="seccion">
+                Sección {{seccion}}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>group</mat-icon>
+            <mat-error>Seleccione una sección</mat-error>
+          </mat-form-field>
+
+          <!-- Periodo -->
+          <mat-form-field appearance="outline">
+            <mat-label>Periodo</mat-label>
+            <mat-select formControlName="periodo">
+              <mat-option *ngFor="let periodo of periodos" 
+                          [value]="periodo.value">
+                {{periodo.viewValue}}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>calendar_today</mat-icon>
+          </mat-form-field>
+
+          <!-- Año -->
+          <mat-form-field appearance="outline">
+            <mat-label>Año Académico</mat-label>
+            <input matInput type="number" formControlName="anio" min="2020">
+            <mat-icon matPrefix>date_range</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="form-actions">
+          <button mat-raised-button type="button" (click)="limpiarFiltros()">
+            <mat-icon>clear</mat-icon>
+            Limpiar
+          </button>
+          <button mat-raised-button color="primary" 
+                  (click)="buscarNotas()"
+                  [disabled]="!filterForm.valid || isLoading">
+            <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+            <mat-icon *ngIf="!isLoading">search</mat-icon>
+            Buscar Notas
+          </button>
+        </div>
+      </form>
+
+
+      <!-- Buscador adicional -->
+      <div class="search-bar" *ngIf="hasSearched && dataSource.data.length > 0">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar en resultados</mat-label>
+          <input matInput (keyup)="applyFilter($event)" 
+                 placeholder="Buscar por estudiante...">
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <button mat-raised-button (click)="exportarExcel()">
+          <mat-icon>download</mat-icon>
+          Exportar
+        </button>
+      </div>
+
+      <!-- Tabla de resultados -->
+      <div class="results-container" *ngIf="hasSearched">
+        <div class="results-header">
+          <h3>
+            <mat-icon>list</mat-icon>
+            Resultados: {{dataSource.data.length}} estudiante(s)
+          </h3>
+        </div>
+
+        <div class="table-container" *ngIf="dataSource.data.length > 0; else noData">
+          <table mat-table [dataSource]="dataSource" 
+                 matSort class="mat-elevation-z2">
+
+            <!-- Columna Estudiante -->
+            <ng-container matColumnDef="estudiante">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Estudiante</th>
+              <td mat-cell *matCellDef="let nota">
+                <div class="student-cell">
+                  <mat-icon class="student-icon">account_circle</mat-icon>
+                  <span>{{nota.nombreEstudiante}}</span>
                 </div>
+              </td>
+            </ng-container>
 
-                <div class="filter-row">
-                    <!-- Periodo -->
-                    <mat-form-field appearance="outline">
-                        <mat-label>Periodo</mat-label>
-                        <mat-select formControlName="periodo">
-                            <mat-option *ngFor="let periodo of periodos" [value]="periodo.value">
-                                {{ periodo.viewValue }}
-                            </mat-option>
-                        </mat-select>
-                        <mat-icon matPrefix>calendar_today</mat-icon>
-                    </mat-form-field>
+            <!-- Columna Competencia -->
+            <ng-container matColumnDef="competencia">
+              <th mat-header-cell *matHeaderCellDef>Competencia</th>
+              <td mat-cell *matCellDef="let nota">
+                {{nota.nombreCompetencia}}
+              </td>
+            </ng-container>
 
-                    <!-- Año -->
-                    <mat-form-field appearance="outline">
-                        <mat-label>Año Académico</mat-label>
-                        <input matInput type="number" formControlName="anio">
-                        <mat-icon matPrefix>event</mat-icon>
-                    </mat-form-field>
+            <!-- Columna Calificación -->
+            <ng-container matColumnDef="calificacion">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Calificación</th>
+              <td mat-cell *matCellDef="let nota">
+                <span class="calificacion-badge" 
+                      [ngClass]="getCalificacionClass(nota.calificacion)">
+                  {{nota.calificacion}}
+                </span>
+              </td>
+            </ng-container>
 
-                    <!-- Botón Buscar -->
-                    <button mat-raised-button color="primary" (click)="buscarNotas()"
-                        [disabled]="!filterForm.valid || isLoading" class="search-button">
-                        <mat-icon>search</mat-icon>
-                        Buscar
-                    </button>
-                </div>
-            </form>
-        </mat-card-content>
-    </mat-card>
+            <!-- Columna Observación -->
+            <ng-container matColumnDef="observacion">
+              <th mat-header-cell *matHeaderCellDef>Observación</th>
+              <td mat-cell *matCellDef="let nota">
+                <span class="observacion-text" [title]="nota.observacion">
+                  {{nota.observacion || 'Sin observaciones'}}
+                </span>
+              </td>
+            </ng-container>
 
-    <!-- Resultados -->
-    <mat-card class="results-card" *ngIf="dataSource.data.length > 0 || isLoading">
-        <mat-card-header class="results-header">
-            <mat-card-title>
-                <h3>
-                    <mat-icon>list</mat-icon>
-                    Resultados ({{ dataSource.data.length }} estudiante(s))
-                </h3>
-            </mat-card-title>
-        </mat-card-header>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
 
-        <mat-card-content>
-            <div class="loading-container" *ngIf="isLoading">
-                <mat-spinner></mat-spinner>
-                <p>Cargando notas...</p>
-            </div>
+          <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" 
+                         showFirstLastButtons>
+          </mat-paginator>
+        </div>
 
-            <div class="table-container" *ngIf="!isLoading">
-                <table mat-table [dataSource]="dataSource" class="mat-elevation-z2">
+        <ng-template #noData>
+          <div class="no-data">
+            <mat-icon>info</mat-icon>
+            <p>No se encontraron notas con los filtros seleccionados</p>
+          </div>
+        </ng-template>
+      </div>
 
-                    <!-- Columna Estudiante -->
-                    <ng-container matColumnDef="estudiante">
-                        <th mat-header-cell *matHeaderCellDef>Estudiante</th>
-                        <td mat-cell *matCellDef="let nota">
-                            <div class="student-cell">
-                                <mat-icon>person</mat-icon>
-                                <span>{{ nota.nombreEstudiante }}</span>
-                            </div>
-                        </td>
-                    </ng-container>
-
-                    <!-- Columna Competencia -->
-                    <ng-container matColumnDef="competencia">
-                        <th mat-header-cell *matHeaderCellDef>Competencia</th>
-                        <td mat-cell *matCellDef="let nota">
-                            <div class="competencia-cell">
-                                <mat-icon>stars</mat-icon>
-                                <span>{{ nota.nombreCompetencia }}</span>
-                            </div>
-                        </td>
-                    </ng-container>
-
-                    <!-- Columna Calificación -->
-                    <ng-container matColumnDef="calificacion">
-                        <th mat-header-cell *matHeaderCellDef>Calificación</th>
-                        <td mat-cell *matCellDef="let nota">
-                            <mat-chip [class]="getCalificacionClass(nota.calificacion)">
-                                {{ nota.calificacion }} - {{ nota.estadoAcademico }}
-                            </mat-chip>
-                        </td>
-                    </ng-container>
-
-                    <!-- Columna Observación -->
-                    <ng-container matColumnDef="observacion">
-                        <th mat-header-cell *matHeaderCellDef>Observación</th>
-                        <td mat-cell *matCellDef="let nota">
-                            <span class="observacion">{{ nota.observacion || 'Sin observación' }}</span>
-                        </td>
-                    </ng-container>
-
-                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                </table>
-            </div>
-        </mat-card-content>
-    </mat-card>
+      <!-- Mensaje inicial -->
+      <div class="initial-message" *ngIf="!hasSearched">
+        <mat-icon>filter_list</mat-icon>
+        <p>Seleccione los filtros y haga clic en "Buscar Notas" para ver los resultados</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </div>

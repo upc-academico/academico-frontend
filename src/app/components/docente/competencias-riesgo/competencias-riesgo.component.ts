@@ -115,40 +115,51 @@ export class CompetenciasRiesgoComponent implements OnInit {
     });
   }
 
-  analizarCompetencias(): void {
-    if (this.filterForm.valid) {
-      this.isLoading = true;
-      const { idCurso, seccion, periodo, anio } = this.filterForm.value;
-
-      this.nS.getCompetenciasConRiesgo(
-        this.currentUserId,
-        idCurso,
-        seccion,
-        periodo,
-        anio
-      ).subscribe({
-        next: (data) => {
-          // Agregar campo total y porcentaje de riesgo
-          const processedData = data.map(comp => ({
-            ...comp,
-            total: (comp.AD || 0) + (comp.A || 0) + (comp.B || 0) + (comp.C || 0),
-            porcentajeRiesgo: this.calcularPorcentajeRiesgo(comp)
-          }));
-
-          this.dataSource = new MatTableDataSource(processedData);
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-          
-          this.crearGrafico(processedData);
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error:', error);
-          this.isLoading = false;
-        }
-      });
+ analizarCompetencias(): void {
+  if (this.filterForm.valid) {
+    this.isLoading = true;
+    
+    // ⬇️ DESTRUIR GRÁFICO ANTERIOR PRIMERO
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = null;
     }
+    
+    const { idCurso, seccion, periodo, anio } = this.filterForm.value;
+
+    this.nS.getCompetenciasConRiesgo(
+      this.currentUserId,
+      idCurso,
+      seccion,
+      periodo,
+      anio
+    ).subscribe({
+      next: (data) => {
+        // Agregar campo total y porcentaje de riesgo
+        const processedData = data.map(comp => ({
+          ...comp,
+          total: (comp.AD || 0) + (comp.A || 0) + (comp.B || 0) + (comp.C || 0),
+          porcentajeRiesgo: this.calcularPorcentajeRiesgo(comp)
+        }));
+
+        this.dataSource = new MatTableDataSource(processedData);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+        
+        this.isLoading = false;
+        
+        // ⬇️ AGREGAR TIMEOUT PARA ESPERAR RENDERIZADO DEL DOM
+        setTimeout(() => {
+          this.crearGrafico(processedData);
+        }, 100);  // Puedes usar 0 o 100ms
+      },
+      error: (error) => {
+        console.error('Error:', error);
+        this.isLoading = false;
+      }
+    });
   }
+}
 
   calcularPorcentajeRiesgo(comp: any): number {
     const total = (comp.AD || 0) + (comp.A || 0) + (comp.B || 0) + (comp.C || 0);

@@ -61,9 +61,9 @@ export class DistribucionCalificacionesComponent implements OnInit {
         this.loadCompetenciasPorCurso(idCurso);
         this.loadSeccionesPorCurso(idCurso);
       }
-      this.filterForm.patchValue({ 
-        idCompetencia: '', 
-        seccion: '' 
+      this.filterForm.patchValue({
+        idCompetencia: '',
+        seccion: ''
       });
     });
   }
@@ -132,8 +132,12 @@ export class DistribucionCalificacionesComponent implements OnInit {
       ).subscribe({
         next: (data) => {
           this.distribucionData = data;
-          this.crearGraficos(data);
           this.isLoading = false;
+
+          // ⬇️ AGREGAR TIMEOUT PARA ESPERAR RENDERIZADO DEL DOM
+          setTimeout(() => {
+            this.crearGraficos(data);
+          }, 0);
         },
         error: (error) => {
           console.error('Error:', error);
@@ -193,7 +197,7 @@ export class DistribucionCalificacionesComponent implements OnInit {
           scales: {
             y: {
               beginAtZero: true,
-              ticks: { 
+              ticks: {
                 stepSize: 1,
                 precision: 0
               },
@@ -239,7 +243,7 @@ export class DistribucionCalificacionesComponent implements OnInit {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { 
+            legend: {
               position: 'bottom',
               labels: {
                 padding: 20,
@@ -271,10 +275,10 @@ export class DistribucionCalificacionesComponent implements OnInit {
 
   getTotalEstudiantes(): number {
     if (!this.distribucionData) return 0;
-    return (this.distribucionData.AD || 0) + 
-           (this.distribucionData.A || 0) + 
-           (this.distribucionData.B || 0) + 
-           (this.distribucionData.C || 0);
+    return (this.distribucionData.AD || 0) +
+      (this.distribucionData.A || 0) +
+      (this.distribucionData.B || 0) +
+      (this.distribucionData.C || 0);
   }
 
   getPorcentaje(valor: number): string {

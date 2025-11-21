@@ -13,7 +13,7 @@ export class GuardService {
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const rpta=this.lService.verificar();
     if(!rpta){
-      this.router.navigate(['/login']);
+      this.router.navigate(['/components/login']);
       return false;
     }
     return rpta;

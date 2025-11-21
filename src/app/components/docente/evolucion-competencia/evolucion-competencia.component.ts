@@ -133,31 +133,42 @@ export class EvolucionCompetenciaComponent implements OnInit {
   }
 
   generarGrafico(): void {
-    if (this.filterForm.valid) {
-      this.isLoading = true;
-      const { idEstudiante, idCompetencia } = this.filterForm.value;
-
-      // Obtener nombres para el título
-      const estudiante = this.estudiantesCurso.find(e => e.idEstudiante === idEstudiante);
-      const competencia = this.competenciasCurso.find(c => c.idCompetencia === idCompetencia);
-
-      this.nombreEstudiante = estudiante ? `${estudiante.nombres} ${estudiante.apellidos}` : '';
-      this.nombreCompetencia = competencia ? competencia.nombreCompetencia.toString() : '';
-
-      this.nS.getEvolucionPorCompetencia(idEstudiante, idCompetencia).subscribe({
-        next: (data) => {
-          this.datosEvolucion = data;
-          this.calcularEstadisticas(data);
-          this.crearGraficoEvolucion(data);
-          this.isLoading = false;
-        },
-        error: (error) => {
-          console.error('Error:', error);
-          this.isLoading = false;
-        }
-      });
+  if (this.filterForm.valid) {
+    this.isLoading = true;
+    
+    // ⬇️ DESTRUIR GRÁFICO ANTERIOR PRIMERO
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = null;
     }
+    
+    const { idEstudiante, idCompetencia } = this.filterForm.value;
+
+    // Obtener nombres para el título
+    const estudiante = this.estudiantesCurso.find(e => e.idEstudiante === idEstudiante);
+    const competencia = this.competenciasCurso.find(c => c.idCompetencia === idCompetencia);
+
+    this.nombreEstudiante = estudiante ? `${estudiante.nombres} ${estudiante.apellidos}` : '';
+    this.nombreCompetencia = competencia ? competencia.nombreCompetencia.toString() : '';
+
+    this.nS.getEvolucionPorCompetencia(idEstudiante, idCompetencia).subscribe({
+      next: (data) => {
+        this.datosEvolucion = data;
+        this.calcularEstadisticas(data);
+        this.isLoading = false;
+        
+        // ⬇️ AGREGAR TIMEOUT PARA ESPERAR RENDERIZADO DEL DOM
+        setTimeout(() => {
+          this.crearGraficoEvolucion(data);
+        }, 100);
+      },
+      error: (error) => {
+        console.error('Error:', error);
+        this.isLoading = false;
+      }
+    });
   }
+}
 
   calcularEstadisticas(datos: any[]): void {
     if (datos.length === 0) return;

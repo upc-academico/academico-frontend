@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { JwtRequest } from '../models/jwRequest';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { Subject } from 'rxjs';
+import { environment } from 'src/environments/environments';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,7 @@ export class LoginService {
 
   constructor(private http: HttpClient) { }
   login(request: JwtRequest) {
-    return this.http.post("http://localhost:8080/auth/login", request);  //cambiar ruta
+    return this.http.post(`${environment.base}/auth/login`, request);
   }
   verificar() {
     let token = sessionStorage.getItem("token");

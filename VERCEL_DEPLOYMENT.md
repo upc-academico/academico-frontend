@@ -127,6 +127,26 @@ Configuración de file replacements para producción:
 
 ---
 
+### 6. `src/app/services/login.service.ts` ✅ CORREGIDO
+
+**Problema encontrado:** URL hardcodeada a localhost
+
+**Solución aplicada:**
+```typescript
+// Antes (incorrecto):
+return this.http.post("http://localhost:8080/auth/login", request);
+
+// Después (correcto):
+import { environment } from 'src/environments/environments';
+return this.http.post(`${environment.base}/auth/login`, request);
+```
+
+**Propósito:**
+- Usa la variable de entorno correcta según el ambiente (desarrollo/producción)
+- Elimina el error de "No hay token en sessionStorage" en producción
+
+---
+
 ## 🚀 Pasos para Deploy en Vercel
 
 ### Opción 1: Deploy desde GitHub (Recomendado)

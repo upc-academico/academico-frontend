@@ -6,6 +6,18 @@
 - **Nombre del Proyecto:** sistema-frontend (academico-frontend)
 - **Directorio de Build:** `dist/sistema-frontend`
 - **Routing:** Angular Router con lazy loading
+- **Backend URL (Producción):** `https://academico-backend-production.up.railway.app`
+
+---
+
+## ⚠️ IMPORTANTE - Error 403 en Producción
+
+Si después del deploy ves un error **403 Forbidden** en la consola del navegador al intentar hacer login, es porque **el backend necesita configurar CORS** para permitir requests desde tu dominio de Vercel.
+
+**Pasos inmediatos:**
+1. Obtén tu URL de Vercel después del primer deploy (ej: `https://academico-frontend-xxx.vercel.app`)
+2. Agrega esa URL a la configuración CORS de tu backend en Railway
+3. Ver sección "Troubleshooting → Error 403 Forbidden" más abajo para código ejemplo
 
 ---
 
@@ -236,6 +248,75 @@ Después del deploy exitoso, verifica:
 ### Error: "API calls failing"
 - **Solución:** Verifica la URL del backend en `environment.prod.ts`
 - Asegúrate que el backend tenga CORS configurado correctamente
+
+#### Error 403 Forbidden en /auth/login
+
+**Causa:** El backend no está permitiendo requests desde el dominio de Vercel por CORS.
+
+**Solución en el Backend (Spring Boot):**
+
+1. Agrega la configuración CORS en tu backend. Crea o actualiza la clase de configuración:
+
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+@Configuration
+public class CorsConfig {
+    
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        
+        config.setAllowCredentials(true);
+        // Permitir tu dominio de Vercel
+        config.addAllowedOrigin("https://tu-app.vercel.app");
+        config.addAllowedOrigin("https://academico-frontend.vercel.app");
+        // Para desarrollo local (remover en producción si no es necesario)
+        config.addAllowedOrigin("http://localhost:4200");
+        
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
+    }
+}
+```
+
+2. **O** si usas `@CrossOrigin` en el controlador, actualízalo:
+
+```java
+@RestController
+@RequestMapping("/auth")
+@CrossOrigin(origins = {
+    "https://tu-app.vercel.app",
+    "https://academico-frontend.vercel.app",
+    "http://localhost:4200"
+})
+public class AuthController {
+    // ... tu código
+}
+```
+
+3. **Railway.app específico:** Asegúrate que tu backend en Railway acepte conexiones de cualquier origen durante las pruebas:
+
+```java
+config.addAllowedOriginPattern("https://*.vercel.app");
+```
+
+**Verificar CORS desde el navegador:**
+```javascript
+// Abre la consola en tu app de Vercel y ejecuta:
+fetch('https://academico-backend-production.up.railway.app/auth/login', {
+  method: 'OPTIONS',
+  headers: { 'Access-Control-Request-Method': 'POST' }
+}).then(r => console.log(r.headers.get('Access-Control-Allow-Origin')))
+```
 
 ### Error: "Build fails"
 - **Solución:** Ejecuta `npm run build:vercel` localmente para identificar errores

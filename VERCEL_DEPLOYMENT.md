@@ -223,9 +223,10 @@ Después del deploy exitoso, verifica:
 
 ### Errores de Budget Size
 - **Solución:** Los límites actuales son:
-  - Initial: 1MB máximo
-  - Component styles: 4KB máximo
-- Si excedes estos límites, ajusta en `angular.json` → `budgets`
+  - Initial: 2MB máximo
+  - Component styles: 20KB máximo
+- Estos límites fueron ajustados para acomodar el tamaño real de la aplicación
+- **Recomendación:** Optimiza archivos CSS grandes, especialmente `home.component.css` (13.94 kB)
 
 ---
 
